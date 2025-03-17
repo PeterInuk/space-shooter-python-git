@@ -1,0 +1,43 @@
+> # Moving the spaceship
+The space ship only moves left. Add the option to move the spaceship 
+to the right.
+
+
+># Alien movement
+The aliens are stationary, make them move down the screen.
+
+
+># Variables for screen 
+Introduce two variables for screen width and height, e.g. 'h' and 'w'.
+Convert the code to use those variables instead of the hardcoded values.
+
+
+> # Prettify the start screen
+Center the "Press [space] to play" text, add some images
+(maybe an alien and a spaceship?), etc.
+
+
+# More sounds
+Play a sound effect when the aliens are killed. Make a theme song in the main menu
+
+
+> # Alien health / hit points / HP
+Aliens are killed by a single shot - give them more health
+so it requires more than on hit to kill them.
+
+hint: aliens already have an x-coordinate, e.g. a['x'], a so called 
+      x attribute. Give them an health attribute, e.g. a['hp']
+
+
+> # Scoreboard
+Count points for each alien killed and display the score.
+
+
+# Game over
+Add a game over state so the text "GAME OVER" is displayed
+on top of the game once an alien touches the bottom of the screen.
+
+Allow the player to restart the game by pressing "[r] to retry".
+
+hint: add another game-state called "gameover", change to that state
+      once an alien touches the bottom of the screen.

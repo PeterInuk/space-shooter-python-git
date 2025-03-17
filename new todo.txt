@@ -1,0 +1,119 @@
+> # Moving the spaceship
+The space ship only moves left. Add the option to move the spaceship 
+to the right.
+
+
+> # Alien movement
+The aliens are stationary, make them down the screen.
+
+Hint: Study how the projectiles / shots are moved upwards
+
+
+> # Variables for screen 
+Introduce two variables for screen width and height, e.g. 'h' and 'w'.
+Convert the code to use those variables instead of the hardcoded values.
+Before we know it the code will be littered with hardcoded 400 and 600,
+because the window dimensions are needed for centering text, collisions
+with the window border etc.
+
+
+> # Prettify the start screen
+Center the "Press [space] to play" text, add some images
+(maybe an alien and a spaceship?), etc.
+
+Hint: Some text is already centered.
+
+
+# More sounds
+Play a sound effect when the aliens are killed.
+
+
+> # Alien health / hit points / HP
+Aliens are killed by a single shot - give them more health
+so it requires more than on hit to kill them.
+
+Hint: Aliens already have an x-coordinate, e.g. a['x'], a so called 
+      attribute. Give them an health attribute, e.g. a['hp']
+
+Hint: Change alien color based on hit points. 
+      See todo '# Change alien color'
+
+
+## Change alien color
+Use change_color() from util.py to change the color of a white alien sprite.
+This can create aliens multiple colors without the need for multiple sprites.
+
+
+Hint: import util
+      img = pg.image.load(f"images/alien_1.png") # White alien sprite
+      img = change_color(img, (200,20,20)) # Red alien
+
+Hint: util.py must be placed in the same folder as game.py
+
+Hint: Requires an alien sprite, e.g. alien_0.png, which is only white
+      and transparent.
+
+
+# Scoreboard
+Count points for each alien killed and display the score.
+
+
+## Background / background image
+Add a more exciting background to the game, maybe twinkling stars.
+
+This can be done by blitting different background images in succession,
+just like other animations.
+
+Alternatively it could be done by drawing circles at random positions
+on the screen and changing the color of those circles.
+
+Hint: See alien and ship animations.
+Hint: pg.draw.circle()
+
+
+# Game over
+Add a game over state so the text "GAME OVER" is displayed
+on top of the game once an alien touches the bottom of the screen.
+
+Allow the player to restart the game by pressing "[r] to retry".
+
+Hint: Add another game-state called "gameover", change to that state
+      once an alien touches the bottom of the screen.
+
+
+
+## Level files
+Use load_level() from util.py to load a level (aliens / alien patterns)
+from a txt-file. Each # in a .txt-file will spawn an alien.
+
+Hint: import util
+      aliens = load_level("level0.txt", 30,30)
+
+Hint: util.py must be placed in the same folder as game.py
+
+
+## More enemies
+Add another type of alien/enemy. Modify load_level() so it translates
+e.g. % or & to other type of aliens. Maybe with other attributes such
+as more health, faster speed, different color etc.
+
+Hint: See todo '# Alien health / hit points / HP'.
+Hint: See todo '# Change alien color'.
+
+
+## Ship / wall collision
+Make sure the ship cannot leave the play area / window.
+In other worlds, implement collision between the ship and the left and
+right walls.
+
+
+## Function for rectangle collision
+Write a function called e.g. 'rect_collide(x1,y1,w1,...x2,y2,...)' 
+which returns True if the two rectangles overlap, otherwise False.
+
+The function can be defined in util.py and imported. This will reduce
+the amount of code in the main game.py file.
+
+Use the function in game.py where you test for collision between
+projectile and aliens, and reuse it if you test for collision between
+aliens and ship.
