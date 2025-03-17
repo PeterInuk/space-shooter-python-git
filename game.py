@@ -2,7 +2,7 @@
 # Made for the purpose of teaching git version control to beginners.
 #Github test
 import pygame as pg
-from util import *
+from Levels.util import *
 import sqlite3
 connection = sqlite3.connect("dataTest.db")
 cursor = connection.cursor()
@@ -52,7 +52,7 @@ n = 1
 
 alien_w = alien_images[0].get_rect().size[0]
 alien_h = alien_images[0].get_rect().size[1]
-aliens = load_level("level0.txt", alien_h,alien_w,n)
+aliens = load_level("Levels/level0.txt", alien_h,alien_w,n)
 # Projectiles 
 projectile_fired = False
 projectiles = []
@@ -120,10 +120,6 @@ while running:
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,100))
 
-            text = font_title.render(f"Write your name:", True, (255,255,255))
-            text_width = text.get_rect().width 
-            screen.blit(text, ((width-text_width)/2,300))
-
             text = font_title.render(f"Press [tab]", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,300))
@@ -145,7 +141,7 @@ while running:
         right_pressed = False
         ship_x = 200 
         lvln = 0
-        aliens = load_level(f"level{lvln}.txt",alien_h,alien_w,n)
+        aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n)
 
         state = "PLAY"
 
@@ -164,8 +160,8 @@ while running:
         if lvln == 6:
             n = 1
             state = "PLAY"
-            aliens = load_level(f"level{lvln}.txt", alien_h,alien_w,n)
-        aliens = load_level(f"level{lvln}.txt", alien_h,alien_w,n)
+            aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n)
+        aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n)
 
         state = "PLAY"
         
@@ -335,7 +331,7 @@ while running:
         scores.append(score)
         highscore = max(scores)
         strscore = str(score)
-        connection.execute(f"insert into whoknowswhat values ({name}, {strscore}); ")
+        connection.execute(f"insert into whoknowswhat values ('{name}' , '{strscore}'); ")
         connection.commit()
         state = "GAME OVER1"
 
@@ -349,21 +345,34 @@ while running:
                 if event.type == pg.QUIT:
                     running = False
 
+                elif event.key == pg.K_BACKSPACE:
+                    name = name[:-1]
+                else:
+                    name += event.unicode
+
+        
+
         #Drawing
         screen.fill((0,0,0)) 
         text = font_scoreboard.render("Lost in Level: "f"{lvln+1}", True, (255,255,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,height/2-130))
+        screen.blit(text, ((width-text_width)/2,50))
 
-        text = font_scoreboard.render("GAME OVER", True, (255,255,255))
-        text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,height/2-50))
         
         text = font_scoreboard.render("Score: " f"{score:04d}", True, (255,255,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,height/2))
+        screen.blit(text, ((width-text_width)/2,height/3))
 
         text = font_scoreboard.render("Highscore: " f"{highscore:04d}", True, (255,255,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,height/3+40))
+
+        text = font_scoreboard.render("WRITE YOUR NAME:", True, (255,255,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,height/2))
+
+        
+        text = font_scoreboard.render(f"{name}", True, (255,255,255))
         text_width = text.get_rect().width 
         screen.blit(text, ((width-text_width)/2,height/2+40))
 
@@ -374,6 +383,8 @@ while running:
         text = font_scoreboard.render("play again", True, (255,255,255))
         text_width = text.get_rect().width 
         screen.blit(text, ((width-text_width)/2,height/2+170))
+        
+        
        
     
     elif state == "LEVELWIN":
