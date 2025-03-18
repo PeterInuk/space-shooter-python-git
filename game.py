@@ -4,6 +4,7 @@
 import pygame as pg
 from Levels.util import *
 import sqlite3
+import random
 connection = sqlite3.connect("dataTest.db")
 cursor = connection.cursor()
 
@@ -142,7 +143,10 @@ while running:
         ship_x = 200 
         lvln = 0
         aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n)
-
+        if name == "" or " " or "  " or '"' or '    ':  
+            name = random.choice(["John Doe", "Jane Doe"])
+        connection.execute(f"insert into whoknowswhat values ('{name}' , '{strscore}'); ")
+        connection.commit()
         state = "PLAY"
 
 
@@ -331,8 +335,7 @@ while running:
         scores.append(score)
         highscore = max(scores)
         strscore = str(score)
-        connection.execute(f"insert into whoknowswhat values ('{name}' , '{strscore}'); ")
-        connection.commit()
+
         state = "GAME OVER1"
 
     elif state == "GAME OVER1":
@@ -348,7 +351,8 @@ while running:
                 elif event.key == pg.K_BACKSPACE:
                     name = name[:-1]
                 else:
-                    name += event.unicode
+                    if not event.key == pg.K_TAB:
+                        name += event.unicode  
 
         
 

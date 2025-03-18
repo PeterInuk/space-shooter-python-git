@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import sqlite3
 
 app = Flask(__name__)
 
@@ -21,6 +22,28 @@ def shooter():
 
     return s
 
+@app.route("/Scores")
+def scores():
+    s = ""
+    connection = sqlite3.connect("dataTest.db")
+    sql = ("SELECT username, score from whoknowswhat;")
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    rest = cursor.fetchall()
+    connection.commit()
+    s += "<table> <tr> <th> Username </th> <th> Score </th> </tr>"
+    for row in rest:
+        s += "<tr>"
+        s += "<th>" + row[0] + "</th> <th>" + str(row[1]) + "</th>" 
+        s += "</tr>"
+    s += "</table>"
+    
+        
+        
+    
+    
+    
+    return s
 
 
 
