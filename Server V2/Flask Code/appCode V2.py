@@ -25,16 +25,17 @@ def shooter():
 @app.route("/Scores")
 def scores():
     s = ""
+    s += "<style> table, th, td {border:1px solid black;}</style>"
     connection = sqlite3.connect("dataTest.db")
-    sql = ("SELECT username, score from whoknowswhat;")
+    sql = ("SELECT username, score from whoknowswhat order by score DESC;")
     cursor = connection.cursor()
     cursor.execute(sql)
     rest = cursor.fetchall()
     connection.commit()
     s += "<table> <tr> <th> Username </th> <th> Score </th> </tr>"
-    for row in rest:
+    for i in range(10):
         s += "<tr>"
-        s += "<th>" + row[0] + "</th> <th>" + str(row[1]) + "</th>" 
+        s += "<th>" + rest[i][0] + "</th> <th>" + str(rest[i][1]) + "</th>" 
         s += "</tr>"
     s += "</table>"
     

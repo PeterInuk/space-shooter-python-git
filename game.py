@@ -143,8 +143,10 @@ while running:
         ship_x = 200 
         lvln = 0
         aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n)
-        if name == "" or " " or "  " or '"' or '    ':  
+        if name == "":  
             name = random.choice(["John Doe", "Jane Doe"])
+        else:
+            name = name
         connection.execute(f"insert into whoknowswhat values ('{name}' , '{strscore}'); ")
         connection.commit()
         state = "PLAY"
@@ -220,11 +222,13 @@ while running:
         ## Updating (movement, collisions, etc.) ##
 
         # Spaceship
-        if left_pressed:
+        if left_pressed and ship_x != 0:
             ship_x -= 8
 
         if right_pressed:
-            ship_x += 8
+            print(ship_x)
+            if ship_x < width-ship_w:
+                ship_x += 8
 
         #Alien movement
         for a in aliens:
