@@ -25,7 +25,7 @@ for i in range(3):
     img = pg.image.load(f"images/ship_{i}.png")
     ship_images.append(img)
     
-ship_x = 200 
+ship_x = 180 
 ship_y = 500
 ship_w = ship_images[0].get_rect().size[0]
 ship_h = ship_images[0].get_rect().size[1]
@@ -140,7 +140,7 @@ while running:
         n = 1
         left_pressed = False
         right_pressed = False
-        ship_x = 200 
+        ship_x = 180 
         lvln = 0
         aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n)
         if name == "":  
@@ -162,8 +162,8 @@ while running:
         n += 1
         left_pressed = False
         right_pressed = False
-        ship_x = 200 
-        if lvln == 6:
+        ship_x = 180 
+        if lvln == 7:
             n = 1
             state = "PLAY"
             aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n)
@@ -184,6 +184,7 @@ while running:
         #level clear check
         if len(aliens) == 0:
             state = "LEVELWIN"
+
 
         ## Event loop  (handle keypresses etc.) ##
         events = pg.event.get()
@@ -208,6 +209,8 @@ while running:
 
                 elif event.key == pg.K_SPACE:
                     projectile_fired = True
+                elif event.key == pg.K_p:
+                    state = "LEVELWIN"
 
             # Keyreleases
             elif event.type == pg.KEYUP:
@@ -226,7 +229,6 @@ while running:
             ship_x -= 8
 
         if right_pressed:
-            print(ship_x)
             if ship_x < width-ship_w:
                 ship_x += 8
 
@@ -444,7 +446,7 @@ while running:
         screen.blit(text, ((width-text_width)/2,height/2+190))
 
 
-        if lvln == 6:
+        if lvln == 7:
             screen.fill((0,0,0)) 
             text = font_scoreboard.render("Level "f"{lvln}"" complete!", True, (255,255,255))
             text_width = text.get_rect().width 

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import sqlite3
+import json
 
 app = Flask(__name__)
 
@@ -19,7 +20,6 @@ def shooter():
         s+= "</tr>"
     s+="</tr> </table>"
 
-
     return s
 
 @app.route("/Scores")
@@ -38,11 +38,6 @@ def scores():
         s += "<th>" + rest[i][0] + "</th> <th>" + str(rest[i][1]) + "</th>" 
         s += "</tr>"
     s += "</table>"
-    
-        
-        
-    
-    
     
     return s
 
