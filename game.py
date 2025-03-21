@@ -18,7 +18,10 @@ screen = pg.display.set_mode((width,height))
 pg.display.set_caption("Space Shooter")
 scores = []
 lvln = 0
+
+#Player data
 name = ""
+health = 1
 # Spaceship character
 ship_images = []
 for i in range(3):
@@ -113,7 +116,7 @@ while running:
                     running = False
                 
                 elif event.key == pg.K_TAB:
-                    state = "PLAY"
+                    state = "GAMEMODE"
 
             screen.fill((0,0,0))
 
@@ -129,6 +132,83 @@ while running:
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,350))
     
+    elif state == "GAMEMODE":
+        events = pg.event.get()
+        for event in events:
+            if event.type == pg.QUIT:
+                running = False
+
+            # Keypresses
+            elif event.type == pg.KEYDOWN:
+
+                if event.key == pg.K_ESCAPE:
+                    running = False
+                
+                elif event.key == pg.K_1:
+                    state = "PLAY"
+                    currentgamemode = "SUPER"
+                    health = 5
+
+                elif event.key == pg.K_2:
+                    state = "PLAY"
+                    currentgamemode = "normal"
+                    health = 5
+                
+                elif event.key == pg.K_3:
+                    state = "PLAY"
+                    currentgamemode = "hard"
+                    health = 1
+                
+                elif event.key == pg.K_4:
+                    state = "PLAY"
+                    currentgamemode = "nightmare"
+                    health = 1
+            #drawing
+            screen.fill((0,0,0))
+
+            text = font_title.render(f"SELECT THE", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,70))
+            
+            text = font_title.render(f"GAMEMODE:", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,100))
+
+            text = font_title.render(f"Press 1 for", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,170))
+            text = font_title.render(f"SUPER SHOOTER", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,200))
+
+
+            text = font_title.render(f"Press 2 for", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,250))
+
+            text = font_title.render(f"normal", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,280))
+
+
+            text = font_title.render(f"Press 3 for", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,340))
+
+            text = font_title.render(f"hard", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,370))
+
+
+            text = font_title.render(f"Press 4 for", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,430))
+
+            text = font_title.render(f"NIGHTMARE", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,460))
+
+
 
 
     elif state == "RESTART":
@@ -147,9 +227,10 @@ while running:
             name = random.choice(["John Doe", "Jane Doe"])
         else:
             name = name
-        connection.execute(f"insert into whoknowswhat values ('{name}' , '{strscore}'); ")
-        connection.commit()
-        state = "PLAY"
+        if currentgamemode == "hard":
+            connection.execute(f"insert into whoknowswhat values ('{name}' , '{strscore}'); ")
+            connection.commit()
+        state = "GAMEMODE"
 
 
 
@@ -165,7 +246,6 @@ while running:
         ship_x = 180 
         if lvln == 7:
             n = 1
-            state = "PLAY"
             aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n)
         aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n)
 
@@ -233,6 +313,13 @@ while running:
                 ship_x += 8
 
         #Alien movement
+        if currentgamemode == "normal" or "SUPER":
+            alienspeed = 0.8
+        if currentgamemode == "hard":
+            alienspeed = 1
+        if currentgamemode == "nightmare":
+            alienspeed = 1.2
+
         for a in aliens:
             a['y'] += alienspeed
         
@@ -307,6 +394,7 @@ while running:
             ratiomaxhealth = alien['hp']/n
             changegreen = 255*ratiomaxhealth
             changered = 255-255*ratiomaxhealth
+            
             img= change_color(alien_images[r], (changered,changegreen,0))
             screen.blit(img, (alien['x'], alien['y']))
            
@@ -321,8 +409,12 @@ while running:
 
 
             #Alien killing you logic
-            if alien['y'] == height-40:
-             state = "GAME OVER"
+            if alien['y'] > height-40:
+                health -= 1
+                aliens.remove(alien)
+                if health == 0:
+                    state = "GAME OVER"
+                    
             
         
         
@@ -336,6 +428,11 @@ while running:
         # Scoreboard
         text = font_scoreboard.render(f"{score:04d}", True, (255,255,255))
         screen.blit(text, (10,560))
+
+        #Player Health
+        
+        text = font_scoreboard.render(f"HEALTH: {health}", True, (255,100,100))
+        screen.blit(text, (200,560))
 
     elif state == "GAME OVER":
         scores.append(score)
@@ -402,6 +499,8 @@ while running:
         scores.append(score)
         highscore = max(scores)
         lvln += 1
+        if currentgamemode == "normal":
+            state = "POWERUP"
         state = "LEVELWIN1"
 
     elif state == "LEVELWIN1":
