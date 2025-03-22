@@ -4,3 +4,5 @@ Normal has a health system for the player
 Hard stays the same
 "SUPER SHOOTER" gamemode with powerups
 SUPER SHOOTER has gold aliens that give coins that you can use to buy power ups
+
+hold space to shoot explosive bullets
