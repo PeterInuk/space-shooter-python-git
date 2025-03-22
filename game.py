@@ -5,6 +5,7 @@ import pygame as pg
 from Levels.util import *
 import sqlite3
 import random
+
 connection = sqlite3.connect("dataTest.db")
 cursor = connection.cursor()
 
@@ -36,6 +37,7 @@ ship_h = ship_images[0].get_rect().size[1]
 # Alien character
 red_color = (255,0,0)
 green_color = (10,200,10)
+
 alien_images = []
 red_alien_images = []
 for i in range(2):
@@ -47,11 +49,7 @@ for i in range(2):
 aliens = []
 alienspeed = 1
 n = 1
-# for i in range(6):
-#     alien1 = {'x': 50*i + 50 , 'y': 0 , 'hp': n, 'hit': False}
-#     alien2 = {'x': 50*i + 50, 'y': 50, 'hp': n, 'hit': False}
-#     aliens.append(alien1)
-#     aliens.append(alien2)
+t = "alien"
 
 
 alien_w = alien_images[0].get_rect().size[0]
@@ -148,11 +146,12 @@ while running:
                     state = "PLAY"
                     currentgamemode = "SUPER"
                     health = 5
+                    
 
                 elif event.key == pg.K_2:
                     state = "PLAY"
                     currentgamemode = "normal"
-                    health = 5
+                    health = 3
                 
                 elif event.key == pg.K_3:
                     state = "PLAY"
@@ -394,18 +393,12 @@ while running:
             ratiomaxhealth = alien['hp']/n
             changegreen = 255*ratiomaxhealth
             changered = 255-255*ratiomaxhealth
-            
+
             img= change_color(alien_images[r], (changered,changegreen,0))
+            if alien['type'] == "coin":
+                img= change_color(alien_images[r], (255,255,0))
             screen.blit(img, (alien['x'], alien['y']))
            
-            #for i in range(2):
-                #img = pg.image.load(f"images/alien_{i}.png")
-                #for k in red_color:
-                    #newred = k/alien['hp']     THIS DOESNT WORK
-                #img = change_color(img, newred)
-                #red_alien_images.append(img)
-            
-            #screen.blit(red_alien_images[r], (alien['x'], alien['y']))
 
 
             #Alien killing you logic

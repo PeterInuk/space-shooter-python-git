@@ -1,5 +1,5 @@
 import pygame as pg
-
+from game import currentgamemode
 
 def load_level(level_file, alien_h, alien_w, n):
     aliens = []
@@ -8,21 +8,17 @@ def load_level(level_file, alien_h, alien_w, n):
         for line in f:
             x = (400-(len(line)*(alien_w+10)))/2+28
             for c in line.strip(): # Remove line ending    
-                print(len(line))
-                
 
                 if c == "A":
-                    alien = {'x': x , 'y': y, 'hp': n }
+                    alien = {'x': x , 'y': y, 'hp': n}
+                    
                     aliens.append(alien)
                     x += alien_w+10
                 if c == "-":
                     x += alien_w+10
-                
-                
 
-                
             y -= alien_h+10
-    print()
+    
     return aliens
 
 # https://stackoverflow.com/questions/56209634/is-it-possible-to-change-sprite-colours-in-pygame
