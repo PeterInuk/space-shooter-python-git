@@ -26,6 +26,14 @@ name = ""
 health = 1
 coins = 0
 selectedtext = 1
+bulletspeed = 8
+bulletdmg = 1
+explosivebullets = False
+explosionx1 = 5
+explosionx2 = 10
+explosiony1 = 70
+explosiony2 = 90
+
 # Spaceship character
 ship_images = []
 for i in range(3):
@@ -333,7 +341,7 @@ while running:
         # Reverse iteration needed to handle each projectile correctly
         # in cases where a projectile is removed.
         for projectile in reversed(projectiles):
-            projectile['y'] -= 8 
+            projectile['y'] -= bulletspeed
 
             # Remove projectiles leaving the top of the screen
             if projectile['y'] < 0:
@@ -344,20 +352,35 @@ while running:
         for projectile in reversed(projectiles):
             for alien in aliens:
 
+                if alien['hp'] < 0 or alien['hp'] == 0:
+                    # Alien is hit dead
+                    aliens.remove(alien)
+                    sound_alienKill.play()
+                    score += 10
+                    if currentgamemode == "SUPER":
+                        if alien['type'] == "coin":
+                            coins += 1
+                
                 # Horizontal (x) overlap
                 if (alien['x'] < projectile['x'] + projectile_w and 
                     projectile['x'] < alien['x']+alien_w):
-
+                    
                     # Vertical (y) overlap 
                     if (projectile['y'] < alien['y'] + alien_h and 
                         alien['y'] < projectile['y'] + projectile_h):
-                        alien['hit'] = True
+                        
+
                         # Alien is hit
                         if alien['type'] == "alien":
-                            alien['hp'] -= 1
+                            alien['hp'] -= bulletdmg
                         if currentgamemode == "SUPER":
                             if alien['type'] == "coin":
-                                alien['hp'] -= 0.5
+                                alien['hp'] -= 0.5*bulletdmg
+                        
+                        explosionx1 = projectile['x'] - 100
+                        explosionx2 = projectile['x'] + 50
+                        explosiony1 = projectile['y'] - 100
+                        explosiony2 = projectile['y'] + 50
                         projectiles.remove(projectile)
                         
                         if alien['hp'] < 0 or alien['hp'] == 0:
@@ -370,12 +393,18 @@ while running:
                                     coins += 1
                         else:
                             sound_alienHit.play()
-                        
+                
                         
                         # No further aliens can be hit by this projectile 
                         # so skip to the next projectile 
                         break
-
+        
+        for alien in aliens:
+            if explosivebullets == True:
+                if alien['x'] > explosionx1 and alien['x'] < explosionx2:
+                    if alien['y'] > explosiony1 and alien['y'] < explosiony2:
+                        alien['hp'] -= 1
+        
         # Firing (spawning new projectiles)
         if projectile_fired:
             sound_laser.play()
@@ -387,13 +416,16 @@ while running:
 
         ## Drawing ##
         screen.fill((0,0,0)) 
+        #explosion
+        pg.draw.rect(screen, [225, 20, 0, 100], [explosionx1,explosiony1,explosionx2-explosionx1,explosiony2-explosiony1], 2)
+        pg.draw.rect(screen, [225, 20, 255, 200], [explosionx1+50,explosiony1+50,explosionx2-explosionx1-50,explosiony2-explosiony1-50])
 
         # 3 images --> tick % 3
         # 100% animation speed: tick % 3
         # 25% animation speed: int(tick/4) % 3
         r = int(tick/4) % 3 
         screen.blit(ship_images[r], (ship_x, ship_y))
-
+        
         # Alien
         
         r = int(tick/8) % 2
@@ -401,7 +433,8 @@ while running:
         
         
         for alien in aliens:
-            ratiomaxhealth = alien['hp']/n
+            if alien['hp'] > 0:
+                ratiomaxhealth = alien['hp']/n
             changegreen = 255*ratiomaxhealth
             changered = 255-255*ratiomaxhealth
             changeyellow = -200*ratiomaxhealth+200
@@ -423,7 +456,8 @@ while running:
                         state = "GAME OVER"
             if alien['y'] > height:
                 aliens.remove(alien)
-                
+        
+        
                     
             
         
@@ -518,7 +552,6 @@ while running:
     
     elif state == "POWERUP":
         
-        
         events = pg.event.get()
         for event in events:
             if event.type == pg.QUIT:
@@ -526,13 +559,30 @@ while running:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_TAB:
                     state = "NEXTLEVEL"
+                #debug
+                if event.key == pg.K_c:
+                    coins += 1
                 if event.key == pg.K_s:
                     if selectedtext < 5:
                         selectedtext +=1
                 if event.key == pg.K_w:
                     if selectedtext > 1:
                         selectedtext -=1
-        print (selectedtext)
+                if event.key == pg.K_SPACE:
+                    if selectedtext == 1:
+                        health += 1
+                        coins -= 5
+                    if selectedtext == 2:
+                        bulletspeed += 2
+                        coins -= 3
+                    if selectedtext == 3:
+                        bulletdmg += 1
+                        coins -= 3
+                    if selectedtext == 4:
+                        explosivebullets = True
+                        coins -= 20
+                    
+
         
 
         screen.fill((0,0,0)) 
@@ -580,21 +630,13 @@ while running:
             bluetext = 100
         else:
             bluetext = 255
-        text = font_scoreboard.render("Full movement [8]", True, (bluetext,bluetext,255))
-        text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,250))
-
-        if selectedtext == 5:
-            bluetext = 100
-        else:
-            bluetext = 255
         
         text = font_scoreboard.render("Explosive", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,300))
+        screen.blit(text, ((width-text_width)/2,250))
         text = font_scoreboard.render("bullets  [20]", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,330))
+        screen.blit(text, ((width-text_width)/2,280))
 
 
         
