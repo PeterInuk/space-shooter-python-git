@@ -2,7 +2,8 @@
 # Made for the purpose of teaching git version control to beginners.
 #Github test
 import pygame as pg
-from Levels.util import *
+from Levels.util import load_level 
+from Levels.util import change_color
 import sqlite3
 import random
 
@@ -23,6 +24,8 @@ lvln = 0
 #Player data
 name = ""
 health = 1
+coins = 0
+selectedtext = 1
 # Spaceship character
 ship_images = []
 for i in range(3):
@@ -54,7 +57,7 @@ t = "alien"
 
 alien_w = alien_images[0].get_rect().size[0]
 alien_h = alien_images[0].get_rect().size[1]
-aliens = load_level("Levels/level0.txt", alien_h,alien_w,n)
+aliens = load_level("Levels/level0.txt", alien_h,alien_w,n,t)
 # Projectiles 
 projectile_fired = False
 projectiles = []
@@ -221,7 +224,7 @@ while running:
         right_pressed = False
         ship_x = 180 
         lvln = 0
-        aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n)
+        aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n,t)
         if name == "":  
             name = random.choice(["John Doe", "Jane Doe"])
         else:
@@ -245,8 +248,8 @@ while running:
         ship_x = 180 
         if lvln == 7:
             n = 1
-            aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n)
-        aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n)
+            aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n, t)
+        aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n, t)
 
         state = "PLAY"
         
@@ -304,13 +307,14 @@ while running:
         ## Updating (movement, collisions, etc.) ##
 
         # Spaceship
-        if left_pressed and ship_x != 0:
-            ship_x -= 8
+        if left_pressed:
+            if ship_x > 0:
+                ship_x -= 8
 
         if right_pressed:
             if ship_x < width-ship_w:
                 ship_x += 8
-
+        
         #Alien movement
         if currentgamemode == "normal" or "SUPER":
             alienspeed = 0.8
@@ -349,7 +353,11 @@ while running:
                         alien['y'] < projectile['y'] + projectile_h):
                         alien['hit'] = True
                         # Alien is hit
-                        alien['hp'] -= 1
+                        if alien['type'] == "alien":
+                            alien['hp'] -= 1
+                        if currentgamemode == "SUPER":
+                            if alien['type'] == "coin":
+                                alien['hp'] -= 0.5
                         projectiles.remove(projectile)
                         
                         if alien['hp'] < 0 or alien['hp'] == 0:
@@ -357,6 +365,9 @@ while running:
                             aliens.remove(alien)
                             sound_alienKill.play()
                             score += 10
+                            if currentgamemode == "SUPER":
+                                if alien['type'] == "coin":
+                                    coins += 1
                         else:
                             sound_alienHit.play()
                         
@@ -393,20 +404,26 @@ while running:
             ratiomaxhealth = alien['hp']/n
             changegreen = 255*ratiomaxhealth
             changered = 255-255*ratiomaxhealth
+            changeyellow = -200*ratiomaxhealth+200
 
             img= change_color(alien_images[r], (changered,changegreen,0))
-            if alien['type'] == "coin":
-                img= change_color(alien_images[r], (255,255,0))
+            if currentgamemode == "SUPER":
+                if alien['type'] == "coin":
+                    img= change_color(alien_images[r], (255,255,changeyellow))
             screen.blit(img, (alien['x'], alien['y']))
            
 
 
             #Alien killing you logic
-            if alien['y'] > height-40:
-                health -= 1
+            if alien['type'] != "coin":
+                if alien['y'] > height-40:
+                    health -= 1
+                    aliens.remove(alien)
+                    if health == 0:
+                        state = "GAME OVER"
+            if alien['y'] > height:
                 aliens.remove(alien)
-                if health == 0:
-                    state = "GAME OVER"
+                
                     
             
         
@@ -426,6 +443,10 @@ while running:
         
         text = font_scoreboard.render(f"HEALTH: {health}", True, (255,100,100))
         screen.blit(text, (200,560))
+        #player coin amount
+        if currentgamemode == "SUPER":
+            text = font_scoreboard.render(f"{coins}", True, (250,250,50))
+            screen.blit(text, (10,530))
 
     elif state == "GAME OVER":
         scores.append(score)
@@ -492,10 +513,95 @@ while running:
         scores.append(score)
         highscore = max(scores)
         lvln += 1
-        if currentgamemode == "normal":
-            state = "POWERUP"
         state = "LEVELWIN1"
+    
+    
+    elif state == "POWERUP":
+        
+        
+        events = pg.event.get()
+        for event in events:
+            if event.type == pg.QUIT:
+                running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_TAB:
+                    state = "NEXTLEVEL"
+                if event.key == pg.K_s:
+                    if selectedtext < 5:
+                        selectedtext +=1
+                if event.key == pg.K_w:
+                    if selectedtext > 1:
+                        selectedtext -=1
+        print (selectedtext)
+        
 
+        screen.fill((0,0,0)) 
+        text = font_scoreboard.render("POWERUP SHOP", True, (255,255,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,10))
+        
+        text = font_scoreboard.render(f"COINS: {coins}", True, (235,235,50))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((10)/2,height-20))
+        
+        text = font_scoreboard.render(f"Tab = continue", True, (255,255,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,height-70))
+
+        text = font_scoreboard.render(f"Spacebar = buy", True, (255,255,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,height-100))
+
+        if selectedtext == 1:
+            bluetext = 100
+        else:
+            bluetext = 255
+        text = font_scoreboard.render("+1 Health [5]", True, (bluetext,bluetext,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,100))
+
+        if selectedtext == 2:
+            bluetext = 100
+        else:
+            bluetext = 255
+        text = font_scoreboard.render("Bullet speed [3]", True, (bluetext,bluetext,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,150))
+
+        if selectedtext == 3:
+            bluetext = 100
+        else:
+            bluetext = 255
+        text = font_scoreboard.render("Bullet damage [3]", True, (bluetext,bluetext,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,200))
+
+        if selectedtext == 4:
+            bluetext = 100
+        else:
+            bluetext = 255
+        text = font_scoreboard.render("Full movement [8]", True, (bluetext,bluetext,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,250))
+
+        if selectedtext == 5:
+            bluetext = 100
+        else:
+            bluetext = 255
+        
+        text = font_scoreboard.render("Explosive", True, (bluetext,bluetext,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,300))
+        text = font_scoreboard.render("bullets  [20]", True, (bluetext,bluetext,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,330))
+
+
+        
+
+
+    
+    
     elif state == "LEVELWIN1":
         #event logic
         events = pg.event.get()
@@ -505,7 +611,10 @@ while running:
                 running = False
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_TAB:
-                    state = "NEXTLEVEL"
+                    if currentgamemode == "SUPER":
+                        state = "POWERUP"
+                    else:
+                        state = "NEXTLEVEL"
                
         #Drawing
         screen.fill((0,0,0)) 
@@ -533,9 +642,14 @@ while running:
         text_width = text.get_rect().width 
         screen.blit(text, ((width-text_width)/2,height/2+160))
         
-        text = font_scoreboard.render("play again", True, (255,255,255))
-        text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,height/2+190))
+        if currentgamemode == "SUPER":
+            text = font_scoreboard.render("go to the SHOP", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,height/2+190))    
+        else:
+            text = font_scoreboard.render("continue", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,height/2+190))
 
 
         if lvln == 7:

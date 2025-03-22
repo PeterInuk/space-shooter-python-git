@@ -1,7 +1,7 @@
 import pygame as pg
-from game import currentgamemode
+import random
 
-def load_level(level_file, alien_h, alien_w, n):
+def load_level(level_file, alien_h, alien_w, n, t):
     aliens = []
     with open(level_file, 'r') as f:
         y = -alien_h
@@ -10,8 +10,12 @@ def load_level(level_file, alien_h, alien_w, n):
             for c in line.strip(): # Remove line ending    
 
                 if c == "A":
-                    alien = {'x': x , 'y': y, 'hp': n}
-                    
+                    alien = {'x': x , 'y': y, 'hp': n, 'type': t}
+                    rando = random.randint(1,100)
+                    if rando > 90:
+                        t = "coin"
+                    if rando < 90:
+                        t = "alien"
                     aliens.append(alien)
                     x += alien_w+10
                 if c == "-":
