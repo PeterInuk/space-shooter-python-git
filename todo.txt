@@ -1,8 +1,20 @@
-Ideas for the game:
+Potential To Do list
+>>Make it so you gain more points when you do the level faster
 Normal has randomly generated levels
-Normal has a health system for the player
-Hard stays the same
-"SUPER SHOOTER" gamemode with powerups
-SUPER SHOOTER has gold aliens that give coins that you can use to buy power ups
+Penetrating bullets
+Powerup balancing (dmg)
+upgradable explosive bullets (larger area/shorter charge time or both)
+Make seperate 
+Boss battle
+Add music
+Make explosive bullets a limited amount 
+Arrow and wasd controls
+shift to move slower
+Soundeffect to buying
+Alien death particle/animation
 
-hold space to shoot explosive bullets
+DONE: Normal has a health system for the player
+DONE: Hard stays the same
+DONE: "SUPER SHOOTER" gamemode with powerups
+DONE: SUPER SHOOTER has gold aliens that give coins that you can use to buy power ups
+DONE: hold space to shoot explosive bullets

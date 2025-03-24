@@ -27,15 +27,8 @@ health = 1
 coins = 0
 selectedtext = 1
 bulletspeed = 8
-bulletdmg = 1
-#debug
-explosivebullets = True
-explosivebullet = False
-penbullets = False
-explosionx1 = 0
-explosionx2 = 0
-explosiony1 = 0
-explosiony2 = 0
+bulletdmg = 0
+
 spacehold = 0
 spaceholding = False
 
@@ -77,12 +70,28 @@ projectiles = []
 projectile_w = 4 
 projectile_h = 8
 
+# Explosive bullets
+explosivebullets = []
+explosivebulletsmode = False
+explosivebullet_fired = False
+penbullets = False
+explosionx1 = 0
+explosionx2 = 0
+explosiony1 = 0
+explosiony2 = 0
+explosionsize = 100
+explosivebullet_w = 15
+explosivebullet_h = 15
+explosivecount = 2
+
 # Keypress status
 left_pressed = False
 right_pressed = False
+shift_pressed = False
 
 # Sound: weapon / laser 
 sound_laser = pg.mixer.Sound("sounds/laser.wav")
+sound_explosion = pg.mixer.Sound("sounds/explosion.wav")
 
 # Sound: Ship truster
 sound_thruster1 = pg.mixer.Sound("sounds/thruster1.wav")
@@ -231,12 +240,25 @@ while running:
         aliens.clear()
         alien.clear()
         projectiles.clear()
+        explosivebullets.clear()
         score = 0
         n = 1
         left_pressed = False
         right_pressed = False
         ship_x = 180 
         lvln = 0
+        bulletspeed = 8
+        bulletdmg = 0
+        explosivebullets = []
+        explosivebulletsmode = False
+        explosivebullet_fired = False
+        penbullets = False
+        explosionx1 = 0
+        explosionx2 = 0
+        explosiony1 = 0
+        explosiony2 = 0
+        explosivecount = 2
+
         aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n,t)
         if name == "":  
             name = random.choice(["John Doe", "Jane Doe"])
@@ -254,11 +276,13 @@ while running:
         aliens.clear()
         alien.clear()
         projectiles.clear()
+        explosivebullets.clear()
         
         n += 1
         left_pressed = False
         right_pressed = False
         ship_x = 180 
+        explosivecount =2
         if lvln == 7:
             n = 1
             aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n, t)
@@ -296,53 +320,65 @@ while running:
                 if event.key == pg.K_ESCAPE:
                     running = False
 
-                elif event.key == pg.K_a:
-                    left_pressed = True
-                
                 elif event.key == pg.K_d:
                     right_pressed = True
+                elif event.key == pg.K_RIGHT:
+                    left_pressed = True
+
+                elif event.key == pg.K_a:
+                    left_pressed = True
+                elif event.key == pg.K_LEFT:
+                    left_pressed = True
+                
+                elif event.key == pg.K_w:
+                    explosivebullet_fired = True
+                    explosivecount -= 1
+                elif event.key == pg.K_UP:
+                    explosivebullet_fired = True
+                    explosivecount -= 1
 
                 elif event.key == pg.K_SPACE:
                     projectile_fired = True
-                    spaceholding = True
-                    print(spacehold)
                     
-
                 elif event.key == pg.K_p:
-                    state = "LEVELWIN"
+                   state = "LEVELWIN"
+                elif event.key == pg.K_LSHIFT:
+                    shift_pressed = True
             
                 
 
             
             # Keyrelease
-            elif event.type == pg.KEYUP:
-                if event.key == pg.K_SPACE:
-                    
-                    if spacehold > 30:
-                        explosivebullet = True
-                        projectile_fired = True
-                    spaceholding = False
-                    spacehold = 0
-                    print(spacehold)
-                        
-                    
+            elif event.type == pg.KEYUP:                
                 if event.key == pg.K_a:
                     left_pressed = False 
-
+                elif event.key == pg.K_LEFT:
+                    left_pressed = False 
+                
                 if event.key == pg.K_d:
                     right_pressed = False 
-
+                elif event.key == pg.K_RIGHT:
+                    right_pressed = False 
+                elif event.key == pg.K_LSHIFT:
+                    shift_pressed = False
+                
 
         ## Updating (movement, collisions, etc.) ##
 
         # Spaceship
         if left_pressed:
             if ship_x > 0:
-                ship_x -= 8
+                if shift_pressed == True:
+                    ship_x -= 4
+                else:
+                    ship_x -= 8
 
         if right_pressed:
             if ship_x < width-ship_w:
-                ship_x += 8
+                if shift_pressed == True:
+                    ship_x += 4
+                else:
+                    ship_x += 8
         
         #Explosive bullet timer
         if spaceholding == True:
@@ -371,15 +407,20 @@ while running:
             # Remove projectiles leaving the top of the screen
             if projectile['y'] < 0:
                 projectiles.remove(projectile)
+        
+        #explosive bullet movement
+        for explosivebullet in reversed(explosivebullets):
+            explosivebullet['y'] -= bulletspeed
+
+            # Remove projectiles leaving the top of the screen
+            if explosivebullet['y'] < 0:
+                explosivebullets.remove(explosivebullet)
 
         # Alien / projectile collision 
         # Test each projectile against each alien
         for projectile in reversed(projectiles):
             for alien in aliens:
-                
-                    
-             
-                
+
                 # Horizontal (x) overlap
                 if (alien['x'] < projectile['x'] + projectile_w and 
                     projectile['x'] < alien['x']+alien_w):
@@ -388,30 +429,18 @@ while running:
                     if (projectile['y'] < alien['y'] + alien_h and 
                         alien['y'] < projectile['y'] + projectile_h):
                         
-
+                        
+                        
                         # Alien is hit
                         if currentgamemode == "SUPER":
                             if alien['type'] == "coin":
-                                alien['hp'] -= 0.5*bulletdmg
+                                alien['hp'] -= 0.5+bulletdmg
                             else:
-                                alien['hp'] -= bulletdmg
+                                alien['hp'] -= 1+bulletdmg
                         else:
-                            alien['hp'] -= bulletdmg
+                            alien['hp'] -= 1
                         
-                        #explosive bullet                        
-                        if explosivebullets == True:
-                            if explosivebullet == True:
-                                explosionx1 = projectile['x'] - 100
-                                explosionx2 = projectile['x'] + 50
-                                explosiony1 = projectile['y'] - 100
-                                explosiony2 = projectile['y'] + 50
-                                if alien['x'] > explosionx1 and alien['x'] < explosionx2:
-                                    if alien['y'] > explosiony1 and alien['y'] < explosiony2:
-                                        if alien['hp'] > 0:
-                                            alien['hp'] -= 1
-                                explosivebullet = False
-                                        
-                            
+                        
                         
                         #future feature
                         #if penbullets == False:
@@ -434,8 +463,51 @@ while running:
                         # so skip to the next projectile 
                         break
         
+
+        #explosive bullet collision check
+        for explosivebullet in reversed(explosivebullets):
+            for alien in aliens:
+
+                # Horizontal (x) overlap
+                if (alien['x'] < explosivebullet['x'] + explosivebullet_w and 
+                    explosivebullet['x'] < alien['x']+alien_w):
+                    
+                    # Vertical (y) overlap 
+                    if (explosivebullet['y'] < alien['y'] + alien_h and 
+                        alien['y'] < explosivebullet['y'] + explosivebullet_h):
+                        
+                        # Alien is hit
+                        
+                        explosionx1 = explosivebullet['x'] - explosionsize
+                        explosionx2 = explosivebullet['x'] + explosionsize
+                        explosiony1 = explosivebullet['y'] - explosionsize
+                        explosiony2 = explosivebullet['y'] + explosionsize
+                        for alien in aliens:
+                            if alien['x'] > explosionx1 and alien['x'] < explosionx2:
+                                if alien['y'] > explosiony1 and alien['y'] < explosiony2:
+                                    if alien['hp'] > 0:
+                                        alien['hp'] -= 4
+
+                        explosivebullets.remove(explosivebullet)
+                    
+                        
+                        if alien['hp'] < 0 or alien['hp'] == 0:
+                            # Alien is hit dead
+                            sound_alienKill.play()
+                            score += 10
+                            if currentgamemode == "SUPER":
+                                if alien['type'] == "coin":
+                                    coins += 1
+                        else:
+                            sound_alienHit.play()
+                        sound_explosion.play()
+                        
+                        # No further aliens can be hit by this projectile 
+                        # so skip to the next projectile 
+                        break
+
         for alien in aliens:
-            if explosivebullets == True:
+            if explosivebulletsmode == True:
                 if alien['x'] > explosionx1 and alien['x'] < explosionx2:
                     if alien['y'] > explosiony1 and alien['y'] < explosiony2:
                         alien['hp'] -= 1
@@ -444,11 +516,17 @@ while running:
         if projectile_fired:
             sound_laser.play()
 
-            projectile = {'x': ship_x + ship_w/2 - projectile_w/2, 'y': ship_y}
+            projectile = {'x': ship_x + ship_w/2 - explosivebullet_w/2, 'y': ship_y}
             projectiles.append(projectile)
             projectile_fired = False
 
-
+        #explosive bullet
+        if explosivebulletsmode == True:
+            if explosivebullet_fired:
+                explosivebullet = {'x': ship_x + ship_w/2 - explosivebullet_w/2, 'y': ship_y}
+                explosivebullets.append(explosivebullet)
+                explosivebullet_fired = False
+            
         ## Drawing ##
         screen.fill((0,0,0)) 
         #explosion
@@ -489,6 +567,8 @@ while running:
                     aliens.remove(alien)
                     if health == 0:
                         state = "GAME OVER"
+            if alien ['y'] > height:
+                aliens.remove(alien)
         
         
                     
@@ -502,12 +582,15 @@ while running:
             rect = (projectile['x'], projectile['y'], projectile_w, projectile_h)
             pg.draw.rect(screen, (255, 0, 0), rect) 
 
+        # Explosive bullet
+        for explosivebullet in explosivebullets:
+            exrect = (explosivebullet['x'], explosivebullet['y'], explosivebullet_w, explosivebullet_h)
+            pg.draw.rect(screen, (200, 100, 0), exrect) 
         # Scoreboard
         text = font_scoreboard.render(f"{score:04d}", True, (255,255,255))
         screen.blit(text, (10,560))
 
         #Player Health
-        
         text = font_scoreboard.render(f"HEALTH: {health}", True, (255,100,100))
         screen.blit(text, (200,560))
         #player coin amount
@@ -518,6 +601,10 @@ while running:
             explosionx2 = 0
             explosiony1 = 0
             explosiony2 = 0
+        if explosivebulletsmode == True:
+            text = font_scoreboard.render(f"{explosivecount}", True, (250,100,0))
+            screen.blit(text, (200,530))
+
         #final alien death check
         for alien in aliens:
             if alien['hp'] == 0:
@@ -608,34 +695,42 @@ while running:
             if event.type == pg.QUIT:
                 running = False
             if event.type == pg.KEYDOWN:
-                if event.key == pg.K_TAB:
-                    state = "NEXTLEVEL"
                 #debug
                 if event.key == pg.K_c:
                     coins += 1
                 if event.key == pg.K_s:
-                    if selectedtext < 5:
+                    if selectedtext < 7:
                         selectedtext +=1
                 if event.key == pg.K_w:
                     if selectedtext > 1:
                         selectedtext -=1
-                if event.key == pg.K_SPACE:
+                if event.key == pg.K_TAB:
                     if selectedtext == 1:
-                        health += 1
-                        coins -= 5
+                        if coins > 4:
+                            health += 1
+                            coins -= 5
                     if selectedtext == 2:
-                        bulletspeed += 2
-                        coins -= 3
+                        if coins > 2:
+                            bulletspeed += 2
+                            coins -= 3
                     if selectedtext == 3:
-                        bulletdmg += 1
-                        coins -= 3
+                        if coins > 9:
+                            bulletdmg += 0.5
+                            coins -= 5
                     if selectedtext == 4:
-                        explosivebullets = True
-                        coins -= 20
+                        if coins > 19:
+                            if explosivebulletsmode == True:
+                                explosionsize += 30
+                            explosivebulletsmode = True
+                            coins -= 20
+                            
                     if selectedtext == 5:
                         if coins > 19:
                             penbullets = True
                             coins -= 20
+                    
+                    if selectedtext == 7:
+                        state = "NEXTLEVEL"
                     
 
         
@@ -649,13 +744,11 @@ while running:
         text_width = text.get_rect().width 
         screen.blit(text, ((10)/2,height-20))
         
-        text = font_scoreboard.render(f"Tab = continue", True, (255,255,255))
-        text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,height-70))
+        
 
-        text = font_scoreboard.render(f"Spacebar = buy", True, (255,255,255))
+        text = font_scoreboard.render(f"Tab = buy", True, (255,255,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,height-100))
+        screen.blit(text, ((width-text_width)/2,70))
 
         if selectedtext == 1:
             bluetext = 100
@@ -663,7 +756,7 @@ while running:
             bluetext = 255
         text = font_scoreboard.render("+1 Health [5]", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,100))
+        screen.blit(text, ((width-text_width)/2,160))
 
         if selectedtext == 2:
             bluetext = 100
@@ -671,26 +764,34 @@ while running:
             bluetext = 255
         text = font_scoreboard.render("Bullet speed [3]", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,150))
+        screen.blit(text, ((width-text_width)/2,210))
 
         if selectedtext == 3:
             bluetext = 100
         else:
             bluetext = 255
-        text = font_scoreboard.render("Bullet damage [3]", True, (bluetext,bluetext,255))
+        text = font_scoreboard.render("Bullet damage [10]", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,200))
+        screen.blit(text, ((width-text_width)/2,260))
 
         if selectedtext == 4:
             bluetext = 100
         else:
             bluetext = 255
-        text = font_scoreboard.render("Explosive", True, (bluetext,bluetext,255))
-        text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,250))
-        text = font_scoreboard.render("bullets  [20]", True, (bluetext,bluetext,255))
-        text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,280))
+        if explosivebulletsmode == True:
+            text = font_scoreboard.render("Increase explosion", True, (bluetext,bluetext,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,310))
+            text = font_scoreboard.render("size  [20]", True, (bluetext,bluetext,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,340))
+        else:
+            text = font_scoreboard.render("Explosive", True, (bluetext,bluetext,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,310))
+            text = font_scoreboard.render("bullets  [20]", True, (bluetext,bluetext,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,340))
 
         if selectedtext == 5:
             bluetext = 100
@@ -698,10 +799,30 @@ while running:
             bluetext = 255
         text = font_scoreboard.render("Penetrating", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,330))
+        screen.blit(text, ((width-text_width)/2,390))
         text = font_scoreboard.render("bullets [20]", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,360))
+        screen.blit(text, ((width-text_width)/2,420))
+
+        if selectedtext == 6:
+            bluetext = 100
+        else:
+            bluetext = 255
+        text = font_scoreboard.render("Longer vision [20]", True, (bluetext,bluetext,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,470))
+        
+
+        if selectedtext == 7:
+            bluetext = 100
+            text = font_scoreboard.render(f"Tab to Continue", True, (bluetext,bluetext,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,520))
+        else:
+            bluetext = 255
+            text = font_scoreboard.render(f"SELECT to Continue", True, (180,180,180))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,520))
 
 
 
