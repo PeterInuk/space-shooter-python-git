@@ -19,7 +19,7 @@ height = 600
 screen = pg.display.set_mode((width,height))
 pg.display.set_caption("Space Shooter")
 scores = []
-lvln = 0
+lvln = 7
 
 #Player data
 name = ""
@@ -37,7 +37,7 @@ ship_images = []
 for i in range(3):
     img = pg.image.load(f"images/ship_{i}.png")
     ship_images.append(img)
-    
+
 ship_x = 180 
 ship_y = 500
 ship_w = ship_images[0].get_rect().size[0]
@@ -57,13 +57,15 @@ for i in range(2):
 
 aliens = []
 alienspeed = 1
+bottomalien = 0
 n = 1
 t = "alien"
 
 
 alien_w = alien_images[0].get_rect().size[0]
 alien_h = alien_images[0].get_rect().size[1]
-aliens = load_level("Levels/level0.txt", alien_h,alien_w,n,t)
+#debug
+aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n,t)
 # Projectiles 
 projectile_fired = False
 projectiles = []
@@ -91,6 +93,9 @@ shift_pressed = False
 
 # Sound: weapon / laser 
 sound_laser = pg.mixer.Sound("sounds/laser.wav")
+
+# Sound: weapon / explosion
+sound_explosivebullet = pg.mixer.Sound("sounds/ExplosiveBullet.wav")
 sound_explosion = pg.mixer.Sound("sounds/explosion.wav")
 
 # Sound: Ship truster
@@ -103,8 +108,22 @@ sound_alienKill = pg.mixer.Sound("sounds/AlienKill.wav")
 # Sound: Alien hit sound
 sound_alienHit = pg.mixer.Sound("sounds/AlienHit.wav")
 
+# Music
+# Music: fightmusic
+pg.mixer.init()
+music = pg.mixer.music
+load_music_intro = music.load("sounds/intromusic.wav")
+load_music_fight = music.load("sounds/fightmusic.wav")
+play_music = music.play(loops=-1)
+
+music.load("sounds/intromusic.wav")
+music.play(loops=-1)
+music.set_volume(0.3)
+print(music.get_volume())
 
 
+
+print(alien_h)
 
 # Fonts
 # https://fonts.google.com/specimen/Press+Start+2P/about
@@ -121,10 +140,9 @@ tick = 0
 score = 0
 state = "START"
 while running:
-    #score
-    
-            
     if state == "START":
+        
+        #pg.mixer.music.play(loops=-1)
         events = pg.event.get()
         for event in events:
 
@@ -159,7 +177,8 @@ while running:
         events = pg.event.get()
         for event in events:
             if event.type == pg.QUIT:
-                running = False
+                    running = False
+           
 
             # Keypresses
             elif event.type == pg.KEYDOWN:
@@ -171,22 +190,30 @@ while running:
                     state = "PLAY"
                     currentgamemode = "SUPER"
                     health = 5
+                    pg.mixer.music.load("sounds/fightmusic.wav")
+                    pg.mixer.music.play(loops=-1)
                     
 
                 elif event.key == pg.K_2:
                     state = "PLAY"
                     currentgamemode = "normal"
                     health = 3
+                    pg.mixer.music.load("sounds/fightmusic.wav")
+                    pg.mixer.music.play(loops=-1)
                 
                 elif event.key == pg.K_3:
                     state = "PLAY"
                     currentgamemode = "hard"
                     health = 1
+                    pg.mixer.music.load("sounds/fightmusic.wav")
+                    pg.mixer.music.play(loops=-1)
                 
                 elif event.key == pg.K_4:
                     state = "PLAY"
                     currentgamemode = "nightmare"
                     health = 1
+                    pg.mixer.music.load("sounds/fightmusic.wav")
+                    pg.mixer.music.play(loops=-1)
             #drawing
             screen.fill((0,0,0))
 
@@ -264,9 +291,26 @@ while running:
             name = random.choice(["John Doe", "Jane Doe"])
         else:
             name = name
-        if currentgamemode == "hard":
-            connection.execute(f"insert into whoknowswhat values ('{name}' , '{strscore}'); ")
+        if currentgamemode == "SUPER":
+            connection.execute(f"insert into SUPERscore values ('{name}' , '{strscore}'); ")
+            connection.commit() 
+
+        if currentgamemode == "normal":
+            connection.execute(f"insert into normalscore values ('{name}' , '{strscore}'); ")
             connection.commit()
+
+        if currentgamemode == "hard":
+            connection.execute(f"insert into hardscore values ('{name}' , '{strscore}'); ")
+            connection.commit()
+
+        if currentgamemode == "nightmare":
+            connection.execute(f"insert into nightmarescore values ('{name}' , '{strscore}'); ")
+            connection.commit()
+        
+        music.load("sounds/intromusic.wav")
+        music.play(loops=-1)
+        music.set_volume(0.3)
+        play_music
         state = "GAMEMODE"
 
 
@@ -315,15 +359,13 @@ while running:
 
             # Keypresses
             elif event.type == pg.KEYDOWN:
-                if event.type == pg.QUIT:
-                    running = False
                 if event.key == pg.K_ESCAPE:
                     running = False
 
                 elif event.key == pg.K_d:
                     right_pressed = True
                 elif event.key == pg.K_RIGHT:
-                    left_pressed = True
+                    right_pressed = True
 
                 elif event.key == pg.K_a:
                     left_pressed = True
@@ -331,15 +373,18 @@ while running:
                     left_pressed = True
                 
                 elif event.key == pg.K_w:
-                    explosivebullet_fired = True
-                    explosivecount -= 1
+                    if explosivecount > 0:
+                        explosivebullet_fired = True
+                        explosivecount -= 1
                 elif event.key == pg.K_UP:
-                    explosivebullet_fired = True
-                    explosivecount -= 1
+                    if explosivecount > 0:
+                        explosivebullet_fired = True
+                        explosivecount -= 1
 
                 elif event.key == pg.K_SPACE:
                     projectile_fired = True
                     
+                #debug
                 elif event.key == pg.K_p:
                    state = "LEVELWIN"
                 elif event.key == pg.K_LSHIFT:
@@ -361,7 +406,7 @@ while running:
                     right_pressed = False 
                 elif event.key == pg.K_LSHIFT:
                     shift_pressed = False
-                
+        
 
         ## Updating (movement, collisions, etc.) ##
 
@@ -380,10 +425,7 @@ while running:
                 else:
                     ship_x += 8
         
-        #Explosive bullet timer
-        if spaceholding == True:
-            spacehold += 1
-            print(spacehold)
+        
         #Alien movement
         if currentgamemode == "normal" or "SUPER":
             alienspeed = 0.8
@@ -452,9 +494,7 @@ while running:
                             # Alien is hit dead
                             sound_alienKill.play()
                             score += 10
-                            if currentgamemode == "SUPER":
-                                if alien['type'] == "coin":
-                                    coins += 1
+                           
                         else:
                             sound_alienHit.play()
                 
@@ -495,9 +535,7 @@ while running:
                             # Alien is hit dead
                             sound_alienKill.play()
                             score += 10
-                            if currentgamemode == "SUPER":
-                                if alien['type'] == "coin":
-                                    coins += 1
+                            
                         else:
                             sound_alienHit.play()
                         sound_explosion.play()
@@ -506,6 +544,7 @@ while running:
                         # so skip to the next projectile 
                         break
 
+        #alien explosion hit detection
         for alien in aliens:
             if explosivebulletsmode == True:
                 if alien['x'] > explosionx1 and alien['x'] < explosionx2:
@@ -516,17 +555,26 @@ while running:
         if projectile_fired:
             sound_laser.play()
 
-            projectile = {'x': ship_x + ship_w/2 - explosivebullet_w/2, 'y': ship_y}
+            projectile = {'x': ship_x + ship_w/2, 'y': ship_y}
             projectiles.append(projectile)
             projectile_fired = False
 
-        #explosive bullet
+        # Firing new explosive bullets
         if explosivebulletsmode == True:
             if explosivebullet_fired:
-                explosivebullet = {'x': ship_x + ship_w/2 - explosivebullet_w/2, 'y': ship_y}
+                sound_explosivebullet.play()
+                explosivebullet = {'x': ship_x + explosivebullet_w/2, 'y': ship_y}
                 explosivebullets.append(explosivebullet)
                 explosivebullet_fired = False
-            
+        
+        
+        if lvln == 7:
+            bottomalien += alienspeed
+            if bottomalien > 36:
+                aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n,t)     
+                bottomalien = 0
+                       
+
         ## Drawing ##
         screen.fill((0,0,0)) 
         #explosion
@@ -602,8 +650,8 @@ while running:
             explosiony1 = 0
             explosiony2 = 0
         if explosivebulletsmode == True:
-            text = font_scoreboard.render(f"{explosivecount}", True, (250,100,0))
-            screen.blit(text, (200,530))
+            text = font_scoreboard.render(f"EB: {explosivecount}", True, (250,100,0))
+            screen.blit(text, (280,530))
 
         #final alien death check
         for alien in aliens:
@@ -629,12 +677,14 @@ while running:
         #event logic
         events = pg.event.get()
         for event in events:
+            if event.type == pg.QUIT:
+                running = False
             if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    running = False
+                
                 if event.key == pg.K_TAB:
                     state = "RESTART"
-                if event.type == pg.QUIT:
-                    running = False
-
                 elif event.key == pg.K_BACKSPACE:
                     name = name[:-1]
                 else:
@@ -695,9 +745,11 @@ while running:
             if event.type == pg.QUIT:
                 running = False
             if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    running = False
                 #debug
-                if event.key == pg.K_c:
-                    coins += 1
+                #if event.key == pg.K_c:
+                    #coins += 1
                 if event.key == pg.K_s:
                     if selectedtext < 7:
                         selectedtext +=1
@@ -839,6 +891,8 @@ while running:
             if event.type == pg.QUIT:
                 running = False
             if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    running = False
                 if event.key == pg.K_TAB:
                     if currentgamemode == "SUPER":
                         state = "POWERUP"

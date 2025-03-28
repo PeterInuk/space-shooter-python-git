@@ -145,3 +145,8 @@ to overlap horizontally the following two statements have to be true:
   (`x2+w2 > x1`)
 
 The same applies in the vertical direction.
+
+
+# Credits
+Music by Smooth McGroove
+https://www.youtube.com/watch?v=iFsou_aLEeM

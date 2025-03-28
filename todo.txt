@@ -4,17 +4,17 @@ Normal has randomly generated levels
 Penetrating bullets
 Powerup balancing (dmg)
 upgradable explosive bullets (larger area/shorter charge time or both)
-Make seperate 
 Boss battle
-Add music
-Make explosive bullets a limited amount 
-Arrow and wasd controls
-shift to move slower
+Add music 
 Soundeffect to buying
 Alien death particle/animation
+Make online scoreboard able to show different scores from different difficulties
 
+DONE: shift to move slower
 DONE: Normal has a health system for the player
 DONE: Hard stays the same
 DONE: "SUPER SHOOTER" gamemode with powerups
 DONE: SUPER SHOOTER has gold aliens that give coins that you can use to buy power ups
 DONE: hold space to shoot explosive bullets
+DONE: Arrow and wasd controls
+DONE: Make explosive bullets a limited amount 
