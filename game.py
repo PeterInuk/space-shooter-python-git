@@ -19,7 +19,7 @@ height = 600
 screen = pg.display.set_mode((width,height))
 pg.display.set_caption("Space Shooter")
 scores = []
-lvln = 7
+lvln = 0
 
 #Player data
 name = ""
@@ -53,8 +53,6 @@ for i in range(2):
     img = pg.image.load(f"images/alien_{i}.png")
     alien_images.append(img)
 
-
-
 aliens = []
 alienspeed = 1
 bottomalien = 0
@@ -64,7 +62,6 @@ t = "alien"
 
 alien_w = alien_images[0].get_rect().size[0]
 alien_h = alien_images[0].get_rect().size[1]
-#debug
 aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n,t)
 # Projectiles 
 projectile_fired = False

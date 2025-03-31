@@ -1,15 +1,18 @@
 Potential To Do list
 >>Make it so you gain more points when you do the level faster
 Normal has randomly generated levels
-Penetrating bullets
+Penetrating bullets 
 Powerup balancing (dmg)
 upgradable explosive bullets (larger area/shorter charge time or both)
 Boss battle
-Add music 
 Soundeffect to buying
 Alien death particle/animation
 Make online scoreboard able to show different scores from different difficulties
+senties flying beside you firing at intevals
+Shooting alien
+Moving alien
 
+DONE: Add music 
 DONE: shift to move slower
 DONE: Normal has a health system for the player
 DONE: Hard stays the same
