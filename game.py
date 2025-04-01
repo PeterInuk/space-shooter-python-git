@@ -74,10 +74,7 @@ projectile_h = 8
 explosivebullets = []
 explosivebulletsmode = False
 explosivebullet_fired = False
-#debug
-penbullets = True
-for projectile in reversed(projectiles):
-    projectile['hitting'] = False
+penbullets = False
 bullethits = 0
 penbulletupgradelvl = 2
 explosionx1 = 0
@@ -282,8 +279,6 @@ while running:
         penbullets = False
         penbulletupgradelvl = 2
         bullethits = 0
-        for projectile in reversed(projectiles):
-            projectile['hitting'] = False
         explosionx1 = 0
         explosionx2 = 0
         explosiony1 = 0
@@ -462,26 +457,12 @@ while running:
         # Alien / projectile collision 
         # Test each projectile against each alien
         for projectile in reversed(projectiles):
-            
-            for alien in aliens:
-                #check if bullet is NOT in an alien
-                #Horizontal check
-                if penbullets == True:
+            if penbullets == True:
                     if penbulletupgradelvl - projectile['alienshit'] == 0:
+                        projectile['x'] = 420
+                        projectile['y'] = 620
                         projectiles.remove(projectile)
-                    if (alien['x'] +alien_w < projectile['x']  or 
-                        alien['x']> projectile['x']+projectile_w ):
-                        print("not in x")
-                        #Vertical check
-                        if (projectile['y'] < alien['y'] + alien_h or 
-                            alien['y'] > projectile['y']):
-                            print("not in y")
-                            print(f'"3"{projectiles}')
-                            projectile['hitting'] = False
-
-                            print(f'"4"{projectiles}')
-                    
-                
+            for alien in aliens:
                 # Check if bullet is within alien hitbox
                 # Horizontal (x) overlap
                 if (alien['x'] < projectile['x'] + projectile_w and 
@@ -502,8 +483,10 @@ while running:
                                     alien['hp'] -= 0.5+bulletdmg
                                 else:
                                     alien['hp'] -= 1+bulletdmg
+                                    print("alienhit")
                             else:
                                 alien['hp'] -= 1
+                                print("alienhit")
                         
                         if penbullets == True:
                             print(f'"0.2"{projectiles}')
@@ -527,6 +510,9 @@ while running:
 
                         
                         break
+                    else:
+                        projectile['hitting'] = False
+
                 
                 
 
@@ -653,8 +639,12 @@ while running:
 
         # Projectiles
         for projectile in projectiles:
-            rect = (projectile['x'], projectile['y'], projectile_w, projectile_h)
-            pg.draw.rect(screen, (255, 0, 0), rect) 
+            projectilerect = (projectile['x'], projectile['y'], projectile_w, projectile_h)
+            if penbullets:
+                pg.draw.rect(screen, (15, 15, 255), projectilerect) 
+            else:
+                pg.draw.rect(screen, (255, 0, 0), projectilerect) 
+
 
         # Explosive bullet
         for explosivebullet in explosivebullets:
@@ -806,9 +796,9 @@ while running:
                         if penbullets == True:
                             penbulletupgradelvl += 1
                             coins -= 20
-                        if coins > 19:
+                        if coins > 29:
                             penbullets = True
-                            coins -= 20
+                            coins -= 30
                         
                     
                     if selectedtext == 7:
@@ -879,12 +869,20 @@ while running:
             bluetext = 100
         else:
             bluetext = 255
-        text = font_scoreboard.render("Penetrating", True, (bluetext,bluetext,255))
-        text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,390))
-        text = font_scoreboard.render("bullets [20]", True, (bluetext,bluetext,255))
-        text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,420))
+        if penbullets:
+            text = font_scoreboard.render("Increase", True, (bluetext,bluetext,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,390))
+            text = font_scoreboard.render("penetration [30]", True, (bluetext,bluetext,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,420))
+        else:
+            text = font_scoreboard.render("Penetrating", True, (bluetext,bluetext,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,390))
+            text = font_scoreboard.render("bullets [30]", True, (bluetext,bluetext,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,420))
 
         if selectedtext == 6:
             bluetext = 100
