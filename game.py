@@ -62,7 +62,8 @@ t = "alien"
 
 alien_w = alien_images[0].get_rect().size[0]
 alien_h = alien_images[0].get_rect().size[1]
-aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n,t)
+hit = False
+aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n,t, hit)
 # Projectiles 
 projectile_fired = False
 projectiles = []
@@ -73,7 +74,12 @@ projectile_h = 8
 explosivebullets = []
 explosivebulletsmode = False
 explosivebullet_fired = False
-penbullets = False
+#debug
+penbullets = True
+for projectile in reversed(projectiles):
+    projectile['hitting'] = False
+bullethits = 0
+penbulletupgradelvl = 2
 explosionx1 = 0
 explosionx2 = 0
 explosiony1 = 0
@@ -116,11 +122,7 @@ play_music = music.play(loops=-1)
 music.load("sounds/intromusic.wav")
 music.play(loops=-1)
 music.set_volume(0.3)
-print(music.get_volume())
 
-
-
-print(alien_h)
 
 # Fonts
 # https://fonts.google.com/specimen/Press+Start+2P/about
@@ -136,6 +138,7 @@ running = True
 tick = 0
 score = 0
 state = "START"
+
 while running:
     if state == "START":
         
@@ -277,13 +280,17 @@ while running:
         explosivebulletsmode = False
         explosivebullet_fired = False
         penbullets = False
+        penbulletupgradelvl = 2
+        bullethits = 0
+        for projectile in reversed(projectiles):
+            projectile['hitting'] = False
         explosionx1 = 0
         explosionx2 = 0
         explosiony1 = 0
         explosiony2 = 0
         explosivecount = 2
 
-        aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n,t)
+        aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n,t, hit)
         if name == "":  
             name = random.choice(["John Doe", "Jane Doe"])
         else:
@@ -326,8 +333,8 @@ while running:
         explosivecount =2
         if lvln == 7:
             n = 1
-            aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n, t)
-        aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n, t)
+            aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n, t, hit)
+        aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n, t, hit)
 
         state = "PLAY"
         
@@ -340,11 +347,10 @@ while running:
         
 
     elif state == "PLAY":
-        
         #level clear check
         if len(aliens) == 0:
             state = "LEVELWIN"
-
+        
 
         ## Event loop  (handle keypresses etc.) ##
         events = pg.event.get()
@@ -446,7 +452,6 @@ while running:
             # Remove projectiles leaving the top of the screen
             if projectile['y'] < 0:
                 projectiles.remove(projectile)
-        
         #explosive bullet movement
         for explosivebullet in reversed(explosivebullets):
             explosivebullet['y'] -= bulletspeed
@@ -454,12 +459,30 @@ while running:
             # Remove projectiles leaving the top of the screen
             if explosivebullet['y'] < 0:
                 explosivebullets.remove(explosivebullet)
-
         # Alien / projectile collision 
         # Test each projectile against each alien
         for projectile in reversed(projectiles):
+            
             for alien in aliens:
+                #check if bullet is NOT in an alien
+                #Horizontal check
+                if penbullets == True:
+                    if penbulletupgradelvl - projectile['alienshit'] == 0:
+                        projectiles.remove(projectile)
+                    if (alien['x'] +alien_w < projectile['x']  or 
+                        alien['x']> projectile['x']+projectile_w ):
+                        print("not in x")
+                        #Vertical check
+                        if (projectile['y'] < alien['y'] + alien_h or 
+                            alien['y'] > projectile['y']):
+                            print("not in y")
+                            print(f'"3"{projectiles}')
+                            projectile['hitting'] = False
 
+                            print(f'"4"{projectiles}')
+                    
+                
+                # Check if bullet is within alien hitbox
                 # Horizontal (x) overlap
                 if (alien['x'] < projectile['x'] + projectile_w and 
                     projectile['x'] < alien['x']+alien_w):
@@ -468,23 +491,29 @@ while running:
                     if (projectile['y'] < alien['y'] + alien_h and 
                         alien['y'] < projectile['y'] + projectile_h):
                         
-                        
-                        
                         # Alien is hit
-                        if currentgamemode == "SUPER":
-                            if alien['type'] == "coin":
-                                alien['hp'] -= 0.5+bulletdmg
+                        
+
+                        print(f'"0"{projectiles}')
+                        if projectile['hitting'] == False:
+                            print(f'"0.1"{projectiles}')
+                            if currentgamemode == "SUPER":
+                                if alien['type'] == "coin":
+                                    alien['hp'] -= 0.5+bulletdmg
+                                else:
+                                    alien['hp'] -= 1+bulletdmg
                             else:
-                                alien['hp'] -= 1+bulletdmg
-                        else:
-                            alien['hp'] -= 1
+                                alien['hp'] -= 1
                         
+                        if penbullets == True:
+                            print(f'"0.2"{projectiles}')
+                            if projectile['hitting'] == False:
+                                projectile['alienshit'] += 1
+                            projectile['hitting'] = True  
+                            print(f'"0.3"{projectiles}')                      
+                        else: 
+                            projectiles.remove(projectile)
                         
-                        
-                        #future feature
-                        #if penbullets == False:
-                        projectiles.remove(projectile)
-                    
                         
                         
                         if alien['hp'] < 0 or alien['hp'] == 0:
@@ -494,12 +523,12 @@ while running:
                            
                         else:
                             sound_alienHit.play()
-                
+
+
                         
-                        # No further aliens can be hit by this projectile 
-                        # so skip to the next projectile 
                         break
-        
+                
+                
 
         #explosive bullet collision check
         for explosivebullet in reversed(explosivebullets):
@@ -552,7 +581,7 @@ while running:
         if projectile_fired:
             sound_laser.play()
 
-            projectile = {'x': ship_x + ship_w/2, 'y': ship_y}
+            projectile = {'x': ship_x + ship_w/2, 'y': ship_y, 'hitting': False, 'alienshit': 0}
             projectiles.append(projectile)
             projectile_fired = False
 
@@ -568,7 +597,7 @@ while running:
         if lvln == 7:
             bottomalien += alienspeed
             if bottomalien > 36:
-                aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n,t)     
+                aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n,t, hit)     
                 bottomalien = 0
                        
 
@@ -745,8 +774,8 @@ while running:
                 if event.key == pg.K_ESCAPE:
                     running = False
                 #debug
-                #if event.key == pg.K_c:
-                    #coins += 1
+                if event.key == pg.K_c:
+                    coins += 1
                 if event.key == pg.K_s:
                     if selectedtext < 7:
                         selectedtext +=1
@@ -774,9 +803,13 @@ while running:
                             coins -= 20
                             
                     if selectedtext == 5:
+                        if penbullets == True:
+                            penbulletupgradelvl += 1
+                            coins -= 20
                         if coins > 19:
                             penbullets = True
                             coins -= 20
+                        
                     
                     if selectedtext == 7:
                         state = "NEXTLEVEL"

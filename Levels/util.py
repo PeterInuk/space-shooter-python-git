@@ -2,13 +2,13 @@ import pygame as pg
 import random
 aliens = []
 
-def load_level(level_file, alien_h, alien_w, n, t):
+def load_level(level_file, alien_h, alien_w, n, t, hit):
     #last level attempt = 9A
     if level_file == "Levels/level7.txt":        
         y = -alien_h
         x = (400-(10*(alien_w)))/2-13
         for c in range(10):
-            alien = {'x': x , 'y': y, 'hp': n, 'type': t}
+            alien = {'x': x , 'y': y, 'hp': n, 'type': t, 'hit': hit}
             rando = random.randint(1,100)
             if rando > 90:
                 t = "coin"
@@ -24,6 +24,7 @@ def load_level(level_file, alien_h, alien_w, n, t):
         with open(level_file, 'r') as f:
             y = -alien_h
             for line in f:
+                    
                     x = (400-(len(line)*(alien_w+10)))/2+28
                     for c in line.strip(): # Remove line ending    
 
