@@ -24,20 +24,26 @@ def shooter():
 
 @app.route("/Scores")
 def scores():
-    s = ""
+    s = "<body style='font-size: 300%;'>"
+    s += "<a href='/Scores/hard'>hard</a>"
+    s += " <a href='/Scores/normal'>normal</a>"
+    s += " <a href='/Scores/SUPER'>SUPER</a>"
+    s += " <a href='/Scores/nightmare'>nightmare</a>"
+    s += "</body>"
     return s
 
 @app.route("/Scores/<difficulty>")
-def hard():
+def getscore(difficulty):
     s = ""
     s += "<style> table, th, td {border:1px solid black;}</style>"
     connection = sqlite3.connect("dataTest.db")
-    sql = ("SELECT username, score from hardscore order by score DESC;")
+    sql = (f"SELECT username, score from {difficulty}score order by score DESC;")
     cursor = connection.cursor()
     cursor.execute(sql)
     rest = cursor.fetchall()
     connection.commit()
     connection.close()
+    s += f"Here is top 10 best players in the world on the {difficulty} difficulty:"
     s += "<table> <tr> <th> Username </th> <th> Score </th> </tr>"
     for i in range(10):
         s += "<tr>"
@@ -45,7 +51,7 @@ def hard():
         s += "</tr>"
     s += "</table>"
     
-    return render_template("index.htm") + s
+    return render_template("index.html", data=rest)
 
 
 

@@ -1,17 +1,16 @@
 Potential To Do list
 >>Make it so you gain more points when you do the level faster
 Normal has randomly generated levels
-Powerup balancing (dmg)
-
 Boss battle
-Soundeffect to buying
 Alien death particle/animation
-Make online scoreboard able to show different scores from different difficulties
-senties flying beside you firing at intevals
+sentries flying beside you firing at intevals
 Shooting alien
 Moving alien
 
 
+DONE: Make online scoreboard able to show different scores from different difficulties
+DONE: Soundeffect to buying
+DONE: Powerup balancing (dmg)
 DONE: upgradable explosive bullets (larger area)
 DONE: Penetrating bullets
 DONE: Add music 

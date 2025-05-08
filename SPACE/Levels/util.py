@@ -4,7 +4,7 @@ aliens = []
 
 def load_level(level_file, alien_h, alien_w, n, t, hit):
     #last level attempt = 9A
-    if level_file == "Levels/level7.txt":        
+    if level_file == "Space-Shooter/Levels/level7.txt":        
         y = -alien_h
         x = (400-(10*(alien_w)))/2-13
         for c in range(10):

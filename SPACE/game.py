@@ -35,7 +35,7 @@ spaceholding = False
 # Spaceship character
 ship_images = []
 for i in range(3):
-    img = pg.image.load(f"images/ship_{i}.png")
+    img = pg.image.load(f"Space-Shooter/images/ship_{i}.png")
     ship_images.append(img)
 
 ship_x = 180 
@@ -50,7 +50,7 @@ green_color = (10,200,10)
 alien_images = []
 red_alien_images = []
 for i in range(2):
-    img = pg.image.load(f"images/alien_{i}.png")
+    img = pg.image.load(f"Space-Shooter/images/alien_{i}.png")
     alien_images.append(img)
 
 aliens = []
@@ -63,7 +63,7 @@ t = "alien"
 alien_w = alien_images[0].get_rect().size[0]
 alien_h = alien_images[0].get_rect().size[1]
 hit = False
-aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n,t, hit)
+aliens = load_level(f"Space-Shooter/Levels/level{lvln}.txt", alien_h,alien_w,n,t, hit)
 # Projectiles 
 projectile_fired = False
 projectiles = []
@@ -92,42 +92,50 @@ right_pressed = False
 shift_pressed = False
 
 # Sound: weapon / laser 
-sound_laser = pg.mixer.Sound("sounds/laser.wav")
+sound_laser = pg.mixer.Sound("Space-Shooter/sounds/laser.wav")
 
 # Sound: weapon / explosion
-sound_explosivebullet = pg.mixer.Sound("sounds/ExplosiveBullet.wav")
-sound_explosion = pg.mixer.Sound("sounds/explosion.wav")
+sound_explosivebullet = pg.mixer.Sound("Space-Shooter/sounds/ExplosiveBullet.wav")
+sound_explosion = pg.mixer.Sound("Space-Shooter/sounds/explosion.wav")
 
-# Sound: Ship truster
-sound_thruster1 = pg.mixer.Sound("sounds/thruster1.wav")
-sound_thruster2 = pg.mixer.Sound("sounds/thruster2.wav")
+# Sound: Buying sound
+sound_buying = pg.mixer.Sound("Space-Shooter/sounds/buying.wav")
+
+# Sound: Invalid input sound
+sound_invalid = pg.mixer.Sound("Space-Shooter/sounds/invalid.wav")
+
+# Sound: Select sound
+sound_select = pg.mixer.Sound("Space-Shooter/sounds/select.wav")
+
+# Sound: Change text sound and alternate select
+sound_select2 = pg.mixer.Sound("Space-Shooter/sounds/selectText.wav")
 
 # Sound: Alien death sound
-sound_alienKill = pg.mixer.Sound("sounds/AlienKill.wav")
+sound_alienKill = pg.mixer.Sound("Space-Shooter/sounds/AlienKill.wav")
 
 # Sound: Alien hit sound
-sound_alienHit = pg.mixer.Sound("sounds/AlienHit.wav")
+sound_alienHit = pg.mixer.Sound("Space-Shooter/sounds/AlienHit.wav")
 
 # Music
 # Music: fightmusic
 pg.mixer.init()
 music = pg.mixer.music
-load_music_intro = music.load("sounds/intromusic.wav")
-load_music_fight = music.load("sounds/fightmusic.wav")
+load_music_intro = music.load("Space-Shooter/sounds/intromusic.wav")
+load_music_fight = music.load("Space-Shooter/sounds/fightmusic.wav")
 play_music = music.play(loops=-1)
 
-music.load("sounds/intromusic.wav")
+music.load("Space-Shooter/sounds/intromusic.wav")
 music.play(loops=-1)
 music.set_volume(0.3)
 
 
 # Fonts
 # https://fonts.google.com/specimen/Press+Start+2P/about
-font_scoreboard = pg.font.Font("fonts/PressStart2P-Regular.ttf", 20)
+font_scoreboard = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 20)
 
-font_start = pg.font.Font("fonts/PressStart2P-Regular.ttf", 20)
+font_start = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 20)
 
-font_title = pg.font.Font("fonts/PressStart2P-Regular.ttf", 25)
+font_title = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 25)
 
 
 ### Game loop ###
@@ -187,30 +195,34 @@ while running:
                     state = "PLAY"
                     currentgamemode = "SUPER"
                     health = 5
-                    pg.mixer.music.load("sounds/fightmusic.wav")
+                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
                     pg.mixer.music.play(loops=-1)
+                    sound_select.play()
                     
 
                 elif event.key == pg.K_2:
                     state = "PLAY"
                     currentgamemode = "normal"
                     health = 3
-                    pg.mixer.music.load("sounds/fightmusic.wav")
+                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
                     pg.mixer.music.play(loops=-1)
+                    sound_select.play()
                 
                 elif event.key == pg.K_3:
                     state = "PLAY"
                     currentgamemode = "hard"
                     health = 1
-                    pg.mixer.music.load("sounds/fightmusic.wav")
+                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
                     pg.mixer.music.play(loops=-1)
+                    sound_select.play()
                 
                 elif event.key == pg.K_4:
                     state = "PLAY"
                     currentgamemode = "nightmare"
                     health = 1
-                    pg.mixer.music.load("sounds/fightmusic.wav")
+                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
                     pg.mixer.music.play(loops=-1)
+                    sound_select.play()
             #drawing
             screen.fill((0,0,0))
 
@@ -267,6 +279,7 @@ while running:
         explosivebullets.clear()
         score = 0
         n = 1
+        coins = 0
         left_pressed = False
         right_pressed = False
         ship_x = 180 
@@ -285,7 +298,7 @@ while running:
         explosiony2 = 0
         explosivecount = 2
 
-        aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n,t, hit)
+        aliens = load_level(f"Space-Shooter/Levels/level{lvln}.txt",alien_h,alien_w,n,t, hit)
         if name == "":  
             name = random.choice(["John Doe", "Jane Doe"])
         else:
@@ -306,7 +319,7 @@ while running:
             connection.execute(f"insert into nightmarescore values ('{name}' , '{strscore}'); ")
             connection.commit()
         
-        music.load("sounds/intromusic.wav")
+        music.load("Space-Shooter/sounds/intromusic.wav")
         music.play(loops=-1)
         music.set_volume(0.3)
         play_music
@@ -328,8 +341,8 @@ while running:
         explosivecount =2
         if lvln == 7:
             n = 1
-            aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n, t, hit)
-        aliens = load_level(f"Levels/level{lvln}.txt", alien_h,alien_w,n, t, hit)
+            aliens = load_level(f"Space-Shooter/Levels/level{lvln}.txt", alien_h,alien_w,n, t, hit)
+        aliens = load_level(f"Space-Shooter/Levels/level{lvln}.txt", alien_h,alien_w,n, t, hit)
 
         state = "PLAY"
         
@@ -475,25 +488,22 @@ while running:
                         # Alien is hit
                         
 
-                        print(f'"0"{projectiles}')
+                        
                         if projectile['hitting'] == False:
-                            print(f'"0.1"{projectiles}')
                             if currentgamemode == "SUPER":
                                 if alien['type'] == "coin":
                                     alien['hp'] -= 0.5+bulletdmg
                                 else:
                                     alien['hp'] -= 1+bulletdmg
-                                    print("alienhit")
+                                    
                             else:
                                 alien['hp'] -= 1
-                                print("alienhit")
+                                
                         
                         if penbullets == True:
-                            print(f'"0.2"{projectiles}')
                             if projectile['hitting'] == False:
                                 projectile['alienshit'] += 1
                             projectile['hitting'] = True  
-                            print(f'"0.3"{projectiles}')                      
                         else: 
                             projectiles.remove(projectile)
                         
@@ -583,7 +593,7 @@ while running:
         if lvln == 7:
             bottomalien += alienspeed
             if bottomalien > 36:
-                aliens = load_level(f"Levels/level{lvln}.txt",alien_h,alien_w,n,t, hit)     
+                aliens = load_level(f"Space-Shooter/Levels/level{lvln}.txt",alien_h,alien_w,n,t, hit)     
                 bottomalien = 0
                        
 
@@ -701,11 +711,14 @@ while running:
                 
                 if event.key == pg.K_TAB:
                     state = "RESTART"
+                    sound_select.play()
                 elif event.key == pg.K_BACKSPACE:
                     name = name[:-1]
+                    sound_select2.play()
                 else:
                     if not event.key == pg.K_TAB:
                         name += event.unicode  
+                        sound_select2.play()
 
         
 
@@ -767,26 +780,36 @@ while running:
                 if event.key == pg.K_c:
                     coins += 1
                 if event.key == pg.K_s:
-                    if selectedtext < 7:
+                    if selectedtext < 6:
                         selectedtext +=1
+                        sound_select2.play()
+                    else:
+                        sound_invalid.play()
                 if event.key == pg.K_w:
                     if selectedtext > 1:
                         selectedtext -=1
+                        sound_select2.play()
+                    else:
+                        sound_invalid.play()
                 if event.key == pg.K_TAB:
                     if selectedtext == 1:
                         if coins > 4:
+                            sound_buying.play()
                             health += 1
                             coins -= 5
                     if selectedtext == 2:
                         if coins > 2:
+                            sound_buying.play()
                             bulletspeed += 2
                             coins -= 3
                     if selectedtext == 3:
                         if coins > 9:
+                            sound_buying.play()
                             bulletdmg += 0.5
                             coins -= 5
                     if selectedtext == 4:
                         if coins > 19:
+                            sound_buying.play()
                             if explosivebulletsmode == True:
                                 explosionsize += 30
                             explosivebulletsmode = True
@@ -797,11 +820,12 @@ while running:
                             penbulletupgradelvl += 1
                             coins -= 20
                         if coins > 29:
+                            sound_buying.play()
                             penbullets = True
                             coins -= 30
                         
                     
-                    if selectedtext == 7:
+                    if selectedtext == 6:
                         state = "NEXTLEVEL"
                     
 
@@ -883,17 +907,9 @@ while running:
             text = font_scoreboard.render("bullets [30]", True, (bluetext,bluetext,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,420))
-
-        if selectedtext == 6:
-            bluetext = 100
-        else:
-            bluetext = 255
-        text = font_scoreboard.render("Longer vision [20]", True, (bluetext,bluetext,255))
-        text_width = text.get_rect().width 
-        screen.blit(text, ((width-text_width)/2,470))
         
 
-        if selectedtext == 7:
+        if selectedtext == 6:
             bluetext = 100
             text = font_scoreboard.render(f"Tab to Continue", True, (bluetext,bluetext,255))
             text_width = text.get_rect().width 
