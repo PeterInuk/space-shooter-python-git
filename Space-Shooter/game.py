@@ -163,7 +163,7 @@ while running:
                 
                 elif event.key == pg.K_TAB:
                     state = "GAMEMODE"
-
+            #Screen reset
             screen.fill((0,0,0))
 
             text = font_title.render(f"Space Shooter", True, (255,255,255))
@@ -192,37 +192,17 @@ while running:
                     running = False
                 
                 elif event.key == pg.K_1:
-                    state = "PLAY"
                     currentgamemode = "SUPER"
-                    health = 5
-                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
-                    pg.mixer.music.play(loops=-1)
-                    sound_select.play()
+                    state = "SELECTEDGAMEMODE"
+
+                    
                     
 
                 elif event.key == pg.K_2:
-                    state = "PLAY"
-                    currentgamemode = "normal"
-                    health = 3
-                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
-                    pg.mixer.music.play(loops=-1)
-                    sound_select.play()
+                    currentgamemode = "space shooter"
+                    state = "SELECTEDGAMEMODE"
                 
-                elif event.key == pg.K_3:
-                    state = "PLAY"
-                    currentgamemode = "hard"
-                    health = 1
-                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
-                    pg.mixer.music.play(loops=-1)
-                    sound_select.play()
                 
-                elif event.key == pg.K_4:
-                    state = "PLAY"
-                    currentgamemode = "nightmare"
-                    health = 1
-                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
-                    pg.mixer.music.play(loops=-1)
-                    sound_select.play()
             #drawing
             screen.fill((0,0,0))
 
@@ -230,7 +210,7 @@ while running:
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,70))
             
-            text = font_title.render(f"GAMEMODE:", True, (255,255,255))
+            text = font_title.render(f"GAMEMODE:", True, (150,150,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,100))
 
@@ -244,12 +224,92 @@ while running:
 
             text = font_title.render(f"Press 2 for", True, (255,255,255))
             text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,300))
+
+            text = font_title.render(f"Space Shooter", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,330))
+
+
+           
+
+
+    elif state == "SELECTEDGAMEMODE":
+        events = pg.event.get()
+        for event in events:
+            if event.type == pg.QUIT:
+                    running = False
+            
+            elif event.type == pg.KEYDOWN:
+
+                if event.key == pg.K_ESCAPE:
+                    running = False
+                
+                elif event.key == pg.K_1:
+                    state = "PLAY"
+                    difficulty = "easy"
+                    health = 5
+                    alienspeed = 0.75
+                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
+                    pg.mixer.music.play(loops=-1)
+                    sound_select.play()
+                
+                elif event.key == pg.K_2:
+                    state = "PLAY"
+                    difficulty = "normal"
+                    health = 3
+                    alienspeed = 0.8
+                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
+                    pg.mixer.music.play(loops=-1)
+                    sound_select.play()
+                
+                elif event.key == pg.K_3:
+                    state = "PLAY"
+                    difficulty = "hard"
+                    health = 1
+                    alienspeed = 1
+                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
+                    pg.mixer.music.play(loops=-1)
+                    sound_select.play()
+                
+                elif event.key == pg.K_4:
+                    state = "PLAY"
+                    difficulty = "NIGHTMARE"
+                    health = 1
+                    alienspeed = 1.2
+                    pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
+                    pg.mixer.music.play(loops=-1)
+                    sound_select.play()
+                elif event.key == pg.K_5:
+                    state = "GAMEMODE"
+            #Reset screen
+            screen.fill((0,0,0))
+
+            text = font_title.render(f"SELECT THE", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,70))
+            
+            text = font_title.render(f"DIFFICULTY:", True, (255,150,150))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,100))
+
+            #difficulty text
+            text = font_title.render(f"Press 1 for", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,170))
+
+            text = font_title.render(f"Easy", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,200))
+
+
+            text = font_title.render(f"Press 2 for", True, (255,255,255))
+            text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,250))
 
-            text = font_title.render(f"normal", True, (255,255,255))
+            text = font_title.render(f"Normal", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,280))
-
 
             text = font_title.render(f"Press 3 for", True, (255,255,255))
             text_width = text.get_rect().width 
@@ -268,7 +328,11 @@ while running:
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,460))
 
+            text = font_title.render(f"5 to go back", True, (255,255,255))
+            text_width = text.get_rect().width 
+            screen.blit(text, ((width-text_width)/2,535))
 
+            
 
 
     elif state == "RESTART":
@@ -438,13 +502,6 @@ while running:
         
         
         #Alien movement
-        if currentgamemode == "normal" or "SUPER":
-            alienspeed = 0.8
-        if currentgamemode == "hard":
-            alienspeed = 1
-        if currentgamemode == "nightmare":
-            alienspeed = 1.2
-
         for a in aliens:
             a['y'] += alienspeed
         
