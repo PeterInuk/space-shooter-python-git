@@ -192,15 +192,17 @@ while running:
                     running = False
                 
                 elif event.key == pg.K_1:
+                    currentgamemode = "space shooter"
+                    state = "SELECTEDGAMEMODE"
+                    
+                elif event.key == pg.K_2:
                     currentgamemode = "SUPER"
                     state = "SELECTEDGAMEMODE"
 
                     
                     
 
-                elif event.key == pg.K_2:
-                    currentgamemode = "space shooter"
-                    state = "SELECTEDGAMEMODE"
+                
                 
                 
             #drawing
@@ -217,7 +219,7 @@ while running:
             text = font_title.render(f"Press 1 for", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,170))
-            text = font_title.render(f"SUPER SHOOTER", True, (255,255,255))
+            text = font_title.render(f"Space Shooter", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,200))
 
@@ -226,7 +228,7 @@ while running:
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,300))
 
-            text = font_title.render(f"Space Shooter", True, (255,255,255))
+            text = font_title.render(f"SUPER SHOOTER", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,330))
 
@@ -280,10 +282,18 @@ while running:
                     pg.mixer.music.load("Space-Shooter/sounds/fightmusic.wav")
                     pg.mixer.music.play(loops=-1)
                     sound_select.play()
+
                 elif event.key == pg.K_5:
                     state = "GAMEMODE"
             #Reset screen
             screen.fill((0,0,0))
+
+            if currentgamemode == "SUPER":
+                text = font_title.render(f"SUPER SHOOTER", True, (255,255,255))
+            elif currentgamemode == "space shooter":
+                text = font_title.render(f"Space Shooter", True, (255,255,255))
+            text_width = text.get_rect().width-10 
+            screen.blit(text, (((width-10)-text_width)/2,10))
 
             text = font_title.render(f"SELECT THE", True, (255,255,255))
             text_width = text.get_rect().width 
