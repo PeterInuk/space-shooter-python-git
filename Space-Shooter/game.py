@@ -17,6 +17,9 @@ clock = pg.time.Clock()
 width = 400
 height = 600
 screen = pg.display.set_mode((width,height))
+overlay = pg.Surface((width, height), pg.SRCALPHA)
+overlay.fill((0, 0, 0, 150))
+show_overlay = False
 pg.display.set_caption("Space Shooter")
 scores = []
 lvln = 0
@@ -133,9 +136,14 @@ music.set_volume(0.3)
 # https://fonts.google.com/specimen/Press+Start+2P/about
 font_scoreboard = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 20)
 
-font_start = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 20)
+font_medium = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 22)
 
-font_title = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 25)
+font_title = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 26)
+
+font_big = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 30)
+
+
+
 
 
 ### Game loop ###
@@ -166,15 +174,15 @@ while running:
             #Screen reset
             screen.fill((0,0,0))
 
-            text = font_title.render(f"Space Shooter", True, (255,255,255))
+            text = font_title.render(f"Space Shooter!", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,100))
 
-            text = font_title.render(f"Press [tab]", True, (255,255,255))
+            text = font_medium.render(f"Press [tab]", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,300))
 
-            text = font_title.render(f"to play!", True, (255,255,255))
+            text = font_medium.render(f"to play!", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,350))
     
@@ -216,19 +224,19 @@ while running:
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,100))
 
-            text = font_title.render(f"Press 1 for", True, (255,255,255))
+            text = font_medium.render(f"Press 1 for", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,170))
-            text = font_title.render(f"Space Shooter", True, (255,255,255))
+            text = font_medium.render(f"Space Shooter", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,200))
 
 
-            text = font_title.render(f"Press 2 for", True, (255,255,255))
+            text = font_medium.render(f"Press 2 for", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,300))
 
-            text = font_title.render(f"SUPER SHOOTER", True, (255,255,255))
+            text = font_medium.render(f"SUPER SHOOTER", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,330))
 
@@ -304,41 +312,41 @@ while running:
             screen.blit(text, ((width-text_width)/2,100))
 
             #difficulty text
-            text = font_title.render(f"Press 1 for", True, (255,255,255))
+            text = font_medium.render(f"Press 1 for", True, (100,255,100))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,170))
 
-            text = font_title.render(f"Easy", True, (255,255,255))
+            text = font_medium.render(f"Easy", True, (100,255,100))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,200))
 
 
-            text = font_title.render(f"Press 2 for", True, (255,255,255))
+            text = font_medium.render(f"Press 2 for", True, (255,255,100))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,250))
 
-            text = font_title.render(f"Normal", True, (255,255,255))
+            text = font_medium.render(f"Normal", True, (255,255,100))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,280))
 
-            text = font_title.render(f"Press 3 for", True, (255,255,255))
+            text = font_medium.render(f"Press 3 for", True, (255,100,100))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,340))
 
-            text = font_title.render(f"hard", True, (255,255,255))
+            text = font_medium.render(f"hard", True, (255,100,100))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,370))
 
 
-            text = font_title.render(f"Press 4 for", True, (255,255,255))
+            text = font_medium.render(f"Press 4 for", True, (150,50,50))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,430))
 
-            text = font_title.render(f"NIGHTMARE", True, (255,255,255))
+            text = font_medium.render(f"NIGHTMARE", True, (150,50,50))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,460))
 
-            text = font_title.render(f"5 to go back", True, (255,255,255))
+            text = font_medium.render(f"5 to go back", True, (255,255,255))
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,535))
 
@@ -425,6 +433,37 @@ while running:
         
        
         
+    elif state =="MENU":
+        events = pg.event.get()
+        for event in events:
+            if event.type == pg.QUIT:
+                running = False
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    state = "PLAY"
+                    pg.mixer.unpause()
+                    music.unpause()
+                    show_overlay = False
+
+
+        
+        #Drawing
+        if show_overlay == True:
+            screen.blit(overlay, (0, 0))
+            show_overlay = False
+        
+        text = font_big.render(f"Paused", True, (255,255,255))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,70))
+        
+
+        
+
+
+        
+
+        
+
             
         
 
@@ -445,7 +484,15 @@ while running:
             # Keypresses
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
-                    running = False
+                    state = "MENU"
+                    right_pressed = False
+                    left_pressed = False
+                    pg.mixer.pause()
+                    music.pause()
+                    show_overlay = True
+                    
+                    
+
 
                 elif event.key == pg.K_d:
                     right_pressed = True
