@@ -18,11 +18,16 @@ width = 400
 height = 600
 screen = pg.display.set_mode((width,height))
 overlay = pg.Surface((width, height), pg.SRCALPHA)
-overlay.fill((0, 0, 0, 150))
+overlay.fill((0, 0, 0, 200))
 show_overlay = False
 pg.display.set_caption("Space Shooter")
 scores = []
 lvln = 0
+
+# Menu
+settingsselected = False
+menu_title = "Paused"
+menu_screen = "PAUSE"
 
 #Player data
 name = ""
@@ -96,26 +101,19 @@ shift_pressed = False
 
 # Sound: weapon / laser 
 sound_laser = pg.mixer.Sound("Space-Shooter/sounds/laser.wav")
-
 # Sound: weapon / explosion
 sound_explosivebullet = pg.mixer.Sound("Space-Shooter/sounds/ExplosiveBullet.wav")
 sound_explosion = pg.mixer.Sound("Space-Shooter/sounds/explosion.wav")
-
 # Sound: Buying sound
 sound_buying = pg.mixer.Sound("Space-Shooter/sounds/buying.wav")
-
 # Sound: Invalid input sound
 sound_invalid = pg.mixer.Sound("Space-Shooter/sounds/invalid.wav")
-
 # Sound: Select sound
 sound_select = pg.mixer.Sound("Space-Shooter/sounds/select.wav")
-
 # Sound: Change text sound and alternate select
 sound_select2 = pg.mixer.Sound("Space-Shooter/sounds/selectText.wav")
-
 # Sound: Alien death sound
 sound_alienKill = pg.mixer.Sound("Space-Shooter/sounds/AlienKill.wav")
-
 # Sound: Alien hit sound
 sound_alienHit = pg.mixer.Sound("Space-Shooter/sounds/AlienHit.wav")
 
@@ -142,8 +140,63 @@ font_title = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 26)
 
 font_big = pg.font.Font("Space-Shooter/fonts/PressStart2P-Regular.ttf", 30)
 
+bluetext = 255
 
+text = font_big.render(f"", True, (255,255,255))
 
+text_rect = text.get_rect(topleft=((width-5)/2,200))
+
+# Variables for functions
+audio_music = 0.5
+audio_music_active = False
+audio_music_text = ""
+audio_music_rec = pg.Rect (200, 200, 140, 40)
+text_rect1 = pg.Rect(0,0,0,0)
+text_rect2 = pg.Rect(0,0,0,0)
+# Function
+def Menu_start():
+    global state, right_pressed, left_pressed, show_overlay, menu_title, menu_screen
+    state = "MENU"
+    menu_title = "Paused"
+    menu_screen = "PAUSE"
+    right_pressed = False
+    left_pressed = False
+    pg.mixer.pause()
+    music.pause()
+    show_overlay = True
+
+def Bluetexts(N):
+    global bluetext, selectedtext
+    if selectedtext == N:
+        bluetext = 100
+    else:
+        bluetext = 255
+
+def Clicktext():
+    global state, show_overlay, running, text_rect1, Bluetexts, bluetext, settingsselected, menu_title, menu_screen, audio_music, audio_music_active
+    if selectedtext == 1:
+        if menu_screen == "SETTINGS":
+            menu_screen = "AUDIO"
+            screen.fill((0,0,0))
+        elif menu_screen == "PAUSE":
+            settingsselected = True
+            menu_title = "Settings:"
+            screen.fill((0,0,0))
+            menu_screen = "SETTINGS"
+        if menu_screen == "AUDIO":
+            screen.fill((0,0,0))
+            audio_music_active = True
+        else:
+            audio_music_active = False
+            
+            
+    elif selectedtext == 2:
+        state = previous_state
+        pg.mixer.unpause()
+        music.unpause()
+        show_overlay = False
+    elif selectedtext == 3:
+        running = False
 
 
 ### Game loop ###
@@ -151,10 +204,11 @@ running = True
 tick = 0
 score = 0
 state = "START"
+previous_state = ""
 
 while running:
     if state == "START":
-        
+        previous_state = state
         #pg.mixer.music.play(loops=-1)
         events = pg.event.get()
         for event in events:
@@ -167,7 +221,7 @@ while running:
             elif event.type == pg.KEYDOWN:
 
                 if event.key == pg.K_ESCAPE:
-                    running = False
+                    Menu_start()
                 
                 elif event.key == pg.K_TAB:
                     state = "GAMEMODE"
@@ -187,17 +241,16 @@ while running:
             screen.blit(text, ((width-text_width)/2,350))
     
     elif state == "GAMEMODE":
+        previous_state = state
         events = pg.event.get()
         for event in events:
             if event.type == pg.QUIT:
                     running = False
-           
-
             # Keypresses
             elif event.type == pg.KEYDOWN:
 
                 if event.key == pg.K_ESCAPE:
-                    running = False
+                    Menu_start()
                 
                 elif event.key == pg.K_1:
                     currentgamemode = "space shooter"
@@ -206,12 +259,6 @@ while running:
                 elif event.key == pg.K_2:
                     currentgamemode = "SUPER"
                     state = "SELECTEDGAMEMODE"
-
-                    
-                    
-
-                
-                
                 
             #drawing
             screen.fill((0,0,0))
@@ -241,10 +288,9 @@ while running:
             screen.blit(text, ((width-text_width)/2,330))
 
 
-           
-
 
     elif state == "SELECTEDGAMEMODE":
+        previous_state = state
         events = pg.event.get()
         for event in events:
             if event.type == pg.QUIT:
@@ -253,7 +299,7 @@ while running:
             elif event.type == pg.KEYDOWN:
 
                 if event.key == pg.K_ESCAPE:
-                    running = False
+                    Menu_start()
                 
                 elif event.key == pg.K_1:
                     state = "PLAY"
@@ -352,7 +398,6 @@ while running:
 
             
 
-
     elif state == "RESTART":
         events = pg.event.get()
         aliens.clear()
@@ -428,46 +473,103 @@ while running:
 
         state = "PLAY"
         
-        
-      
-        
        
         
     elif state =="MENU":
+        mouse_pos = pg.mouse.get_pos()
         events = pg.event.get()
         for event in events:
             if event.type == pg.QUIT:
                 running = False
             elif event.type == pg.KEYDOWN:
+                if audio_music_active:
+                    if event.key == pg.K_RETURN:
+                        if audio_music_text.isdigit():  # Only accept digits
+                            audio_music = float(audio_music_text)
+                            print("Variable changed to:", audio_music)
+                    elif event.key == pg.K_BACKSPACE:
+                        audio_music_text = audio_music_text[:-1]
+                    else:
+                        if event.unicode.isdigit():  # Only allow number input
+                            audio_music_text += event.unicode
+
                 if event.key == pg.K_ESCAPE:
-                    state = "PLAY"
+                    state = previous_state
                     pg.mixer.unpause()
                     music.unpause()
                     show_overlay = False
-
+                elif event.key == pg.K_r:
+                    print(f"{menu_screen}")
+                elif event.key == pg.K_s:
+                    if selectedtext < 2:
+                        selectedtext += 1
+                elif event.key == pg.K_w:
+                    if selectedtext > 1:
+                        selectedtext -= 1
+                elif event.key == pg.K_DOWN:
+                    if selectedtext < 3:
+                        selectedtext += 1
+                elif event.key == pg.K_UP:
+                    if selectedtext > 1:
+                        selectedtext -= 1
+                elif event.key == pg.K_TAB:
+                    Clicktext()
+                elif event.key == pg.K_SPACE:
+                    Clicktext()
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                Clicktext()
+            elif text_rect1.collidepoint(mouse_pos) == True:
+                selectedtext = 1
+                
+            
+            if text_rect2.collidepoint(mouse_pos) == True:
+                selectedtext = 2
+                
 
         
         #Drawing
+        screen.fill((0,0,0))
         if show_overlay == True:
             screen.blit(overlay, (0, 0))
             show_overlay = False
         
-        text = font_big.render(f"Paused", True, (255,255,255))
+        
+        text = font_big.render(f"{menu_title}", True, (255,255,255))
         text_width = text.get_rect().width 
         screen.blit(text, ((width-text_width)/2,70))
         
-
+        # Text 1
+        Bluetexts(1)
+        if menu_screen == "SETTINGS":
+            text = font_medium.render(f"Audio settings", True, (bluetext,bluetext,255))
         
-
-
+        elif menu_screen == "AUDIO":
+            text = font_medium.render(f"{audio_music}", True, (bluetext,bluetext,255))
+            text_width = max(140, text.get_width() + 10)
+            audio_music_rec.w = text_width
+            #screen.blit(text, (text_rect1.x + 5, text_rect1.y + 5))
+            pg.draw.rect(screen, (0,0,0), text_rect1)
         
+        elif menu_screen == "PAUSE":
+            text = font_medium.render(f"Settings", True, (bluetext,bluetext,255))
+        text_rect1 = text.get_rect(topleft=((width-text_width)/2,200))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,200))
 
+        # Text 2
+        Bluetexts(2)
+        text = font_medium.render(f"Continue", True, (bluetext,bluetext,255))
+        text_rect2 = text.get_rect(topleft=((width-text_width)/2,250))
+        text_width = text.get_rect().width 
+        screen.blit(text, ((width-text_width)/2,250))
+        
         
 
             
         
 
     elif state == "PLAY":
+        previous_state = state
         #level clear check
         if len(aliens) == 0:
             state = "LEVELWIN"
@@ -484,15 +586,7 @@ while running:
             # Keypresses
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
-                    state = "MENU"
-                    right_pressed = False
-                    left_pressed = False
-                    pg.mixer.pause()
-                    music.pause()
-                    show_overlay = True
-                    
-                    
-
+                    Menu_start()
 
                 elif event.key == pg.K_d:
                     right_pressed = True
@@ -522,9 +616,6 @@ while running:
                 elif event.key == pg.K_LSHIFT:
                     shift_pressed = True
             
-                
-
-            
             # Keyrelease
             elif event.type == pg.KEYUP:                
                 if event.key == pg.K_a:
@@ -539,9 +630,7 @@ while running:
                 elif event.key == pg.K_LSHIFT:
                     shift_pressed = False
         
-
         ## Updating (movement, collisions, etc.) ##
-
         # Spaceship
         if left_pressed:
             if ship_x > 0:
@@ -557,13 +646,9 @@ while running:
                 else:
                     ship_x += 8
         
-        
         #Alien movement
         for a in aliens:
             a['y'] += alienspeed
-        
-       
-
     
         # Projectile movement
         # Reverse iteration needed to handle each projectile correctly
@@ -814,6 +899,7 @@ while running:
         state = "GAME OVER1"
 
     elif state == "GAME OVER1":
+        previous_state = state
         #event logic
         events = pg.event.get()
         for event in events:
@@ -821,7 +907,7 @@ while running:
                 running = False
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
-                    running = False
+                    Menu_start()
                 
                 if event.key == pg.K_TAB:
                     state = "RESTART"
@@ -882,14 +968,20 @@ while running:
     
     
     elif state == "POWERUP":
-        
+        previous_state = state
+        def Bluetexts(N):
+            global bluetext, selectedtext
+            if selectedtext == N:
+                bluetext = 100
+            else:
+                bluetext = 255
         events = pg.event.get()
         for event in events:
             if event.type == pg.QUIT:
                 running = False
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
-                    running = False
+                    Menu_start()
                 #debug
                 if event.key == pg.K_c:
                     coins += 1
@@ -960,34 +1052,22 @@ while running:
         text_width = text.get_rect().width 
         screen.blit(text, ((width-text_width)/2,70))
 
-        if selectedtext == 1:
-            bluetext = 100
-        else:
-            bluetext = 255
+        Bluetexts(1)
         text = font_scoreboard.render("+1 Health [5]", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
         screen.blit(text, ((width-text_width)/2,160))
 
-        if selectedtext == 2:
-            bluetext = 100
-        else:
-            bluetext = 255
+        Bluetexts(2)
         text = font_scoreboard.render("Bullet speed [3]", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
         screen.blit(text, ((width-text_width)/2,210))
 
-        if selectedtext == 3:
-            bluetext = 100
-        else:
-            bluetext = 255
+        Bluetexts(3)
         text = font_scoreboard.render("Bullet damage [10]", True, (bluetext,bluetext,255))
         text_width = text.get_rect().width 
         screen.blit(text, ((width-text_width)/2,260))
 
-        if selectedtext == 4:
-            bluetext = 100
-        else:
-            bluetext = 255
+        Bluetexts(4)
         if explosivebulletsmode == True:
             text = font_scoreboard.render("Increase explosion", True, (bluetext,bluetext,255))
             text_width = text.get_rect().width 
@@ -1003,10 +1083,7 @@ while running:
             text_width = text.get_rect().width 
             screen.blit(text, ((width-text_width)/2,340))
 
-        if selectedtext == 5:
-            bluetext = 100
-        else:
-            bluetext = 255
+        Bluetexts(5)
         if penbullets:
             text = font_scoreboard.render("Increase", True, (bluetext,bluetext,255))
             text_width = text.get_rect().width 
@@ -1042,6 +1119,7 @@ while running:
     
     
     elif state == "LEVELWIN1":
+        previous_state = state
         #event logic
         events = pg.event.get()
         
@@ -1050,7 +1128,7 @@ while running:
                 running = False
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
-                    running = False
+                    Menu_start()
                 if event.key == pg.K_TAB:
                     if currentgamemode == "SUPER":
                         state = "POWERUP"

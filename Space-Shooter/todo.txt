@@ -6,6 +6,7 @@ Alien death particle/animation
 sentries flying beside you firing at intevals
 Shooting alien
 Moving alien
+PAUSE menu: controls, audio settings, default settings, reset button, Continue, Highscore
 
 
 DONE: Make online scoreboard able to show different scores from different difficulties
